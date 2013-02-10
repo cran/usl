@@ -1,0 +1,33 @@
+
+R version 2.15.2 (2012-10-26) -- "Trick or Treat"
+Copyright (C) 2012 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> #
+> # Test failure when normalization is not possible
+> #
+> 
+> library(usl)
+Loading required package: nlmrt
+> 
+> try(usl(throughput ~ load,
++         data.frame(load=seq(2,8), throughput=2*seq(2,8))))
+Error in usl.solve(data.frame(frame[regr], frame[resp])) :
+  'data' must contain a row where 'load' = 1
+> 
+> proc.time()
+   user  system elapsed 
+   0.20    0.07    0.26 
