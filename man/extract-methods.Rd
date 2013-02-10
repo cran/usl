@@ -1,0 +1,37 @@
+\docType{methods}
+\name{$}
+\alias{$}
+\alias{$,USL-method}
+\title{Extract parts of a "\code{USL}" object}
+\usage{
+\S4method{$}{USL}(x, name)
+}
+\arguments{
+  \item{x}{Object from which to extract elements.}
+
+  \item{name}{A literal character string or a \link{name}
+  (possibly quoted).}
+}
+\description{
+  The operator extracts a part of a \code{\link{USL-class}}
+  object.
+}
+\details{
+  This is a generic method for the class used in the usl
+  package.
+
+  The operator is used internally by functions like
+  \code{\link{coef}}, so it is necessary to have a working
+  implementation of the \code{coef} function.
+}
+\examples{
+\dontrun{
+## get coefficients from a usl model
+usl.model$coefficients
+}
+}
+\seealso{
+  \code{\link{USL-class}}, \code{\link{Extract}}
+}
+\keyword{internal}
+
