@@ -193,6 +193,12 @@ usl.solve.nlxb <- function(model) {
 #'     expected to be more robust than the \code{nls} method.
 #' }
 #'
+#' The parameter \code{R} defines the number of bootstrap replicates used to
+#' estimate the parameter confidence intervals. Depending on the number of
+#' observations the default 50 may be too low to get reasonable results. See
+#' \code{\link{boot}} and \code{\link{boot.ci}} for details. The method
+#' \code{\link{confint}} is used to get confidence intervals for a model.
+#'
 #' The Universal Scalability Law can be expressed with following formula.
 #' \code{C(N)} predicts the relative capacity of the system for a given
 #' load \code{N}:
@@ -209,13 +215,15 @@ usl.solve.nlxb <- function(model) {
 #'   \code{usl} is called.
 #' @param method Character value specifying the method to use. The possible
 #'   values are described unter 'Details'.
+#' @param R The number of bootstrap replicate used to estimate the confidence
+#'   intervals for the parameters \code{sigma} and \code{kappa}.
 #'
 #' @return An object of class USL.
 #'
 #' @seealso \code{\link{efficiency}}, \code{\link{scalability}},
 #'   \code{\link{peak.scalability}}, \code{\link{summary}},
 #'   \code{\link{coef}}, \code{\link{fitted}}, \code{\link{residuals}},
-#'   \code{\link{deviance}}
+#'   \code{\link{deviance}}, \code{\link{confint}}
 #'
 #' @references Neil J. Gunther. Guerrilla Capacity Planning: A Tactical
 #'   Approach to Planning for Highly Scalable Applications and Services.
@@ -248,9 +256,10 @@ usl.solve.nlxb <- function(model) {
 #' plot(raytracer)
 #' plot(usl.model, add=TRUE)
 #'
+#' @importFrom boot boot
 #' @export
 #'
-usl <- function(formula, data, method = "default") {
+usl <- function(formula, data, method = "default", R = 50) {
   ## canonicalize the arguments
   formula <- as.formula(formula)
 
@@ -291,17 +300,34 @@ usl <- function(formula, data, method = "default") {
   regr <- var.names[-attr(mt, "response")] # predictor
   resp <- var.names[attr(mt, "response")]  # response
 
+  model.input <- data.frame(frame[regr], frame[resp])
+
   # Choose solver function
   sel <- switch(method, nls=2, nlxb=3, 1)
   usl.solve <- switch(sel, usl.solve.lm, usl.solve.nls, usl.solve.nlxb)
 
   # Solve the model for the model frame
-  model.result <- usl.solve(data.frame(frame[regr], frame[resp]))
+  model.result <- usl.solve(model.input)
+
+  # Bootstrap confidence intervals for model parameters sigma & kappa
+  boot.func <- function(model.input, indices) {
+    # Use tryCatch to ignore all errors when solving the model
+    result <- tryCatch(usl.solve(model.input[indices, ]),
+                       error = function(err) list(sigma = NA, kappa = NA))
+
+    # Coefficients must not be negative
+    if (any(result < 0, na.rm = TRUE)) result <- list(sigma = NA, kappa = NA)
+
+    return(c(result[['sigma']], result[['kappa']]))
+  }
+
+  boot.obj <- boot(data = model.input, statistic = boot.func, R = R)
 
   # Create object for class USL
   .Object <- new(Class = "USL", call, frame, regr, resp,
                  model.result[['scale.factor']],
-                 model.result[['sigma']], model.result[['kappa']])
+                 model.result[['sigma']], model.result[['kappa']],
+                 boot.obj)
 
   # Finish the object and return it
   return(finish(.Object))
