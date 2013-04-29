@@ -1,8 +1,0 @@
-TODO
-====
-
-* Confidence intervals for coefficients: confint() using bootstrapping
-
-* Weighted nonlinear regression?
-
-* Write vignette including example analysis

@@ -1,0 +1,8 @@
+\select@language {english}
+\contentsline {section}{\numberline {1}Version}{1}{section.1}
+\contentsline {section}{\numberline {2}Introduction}{2}{section.2}
+\contentsline {section}{\numberline {3}Background}{2}{section.3}
+\contentsline {section}{\numberline {4}Examples of Scalability Analysis}{3}{section.4}
+\contentsline {subsection}{\numberline {4.1}Case Study: Hardware Scalability}{4}{subsection.4.1}
+\contentsline {subsection}{\numberline {4.2}Case Study: Software Scalability}{9}{subsection.4.2}
+\contentsline {section}{References}{13}{section*.2}
