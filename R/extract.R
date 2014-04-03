@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Stefan Moeding
+# Copyright (c) 2013, 2014 Stefan Moeding
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,6 @@
 #' it is necessary to have a working implementation of the \code{coef}
 #' function.
 #'
-#' @usage \S4method{$}{USL}(x, name)
 #' @param x Object from which to extract elements.
 #' @param name A literal character string or a \link{name} (possibly quoted).
 #'
@@ -46,9 +45,6 @@
 #' usl.model$coefficients
 #' }
 #'
-#' @aliases $,USL-method
-#' @docType methods
-#' @rdname extract-methods
 #' @keywords internal
 #'
 setMethod(

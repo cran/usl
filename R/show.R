@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Stefan Moeding
+# Copyright (c) 2013, 2014 Stefan Moeding
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,6 @@
 #'
 #' Display the object by printing it.
 #'
-#' @usage \S4method{show}{USL}(object)
 #' @param object The object to be printed.
 #'
 #' @return \code{show} returns an invisible \code{NULL}.
@@ -43,9 +42,6 @@
 #' ## Show USL model
 #' show(usl(throughput ~ processors, raytracer))
 #'
-#' @aliases show,USL-method
-#' @docType methods
-#' @rdname show-methods
 #' @export
 setMethod(
   f = "show",

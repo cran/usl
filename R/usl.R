@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Stefan Moeding
+# Copyright (c) 2013, 2014 Stefan Moeding
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -46,12 +46,12 @@
 #'
 usl.solve.lm <- function(model) {
   # Verify that the scale factor for normalization is in the dataframe
-  if (all(model[1, ] != 1)) {
+  if (all(model[ , 1] != 1)) {
     stop(paste0("'data' must contain a row where '", names(model[1]), "' = 1"))
   }
 
   # Calculate scale factor: get throughput for entry where load=1
-  scale.factor <- model[match(1, model[1, ]), 2]
+  scale.factor <- model[match(1, model[ , 1]), 2]
 
   # Rename columns
   names(model) <- c("load", "throughput")
@@ -196,8 +196,11 @@ usl.solve.nlxb <- function(model) {
 #' The parameter \code{R} defines the number of bootstrap replicates used to
 #' estimate the parameter confidence intervals. Depending on the number of
 #' observations the default 50 may be too low to get reasonable results. See
-#' \code{\link{boot}} and \code{\link{boot.ci}} for details. The method
-#' \code{\link{confint}} is used to get confidence intervals for a model.
+#' \code{\link{boot}} and \code{\link{boot.ci}} for details. Bootstrapping with
+#' \code{method="default"} can give overly bad results as the method only works
+#' when the normalization factor can be calculated from the sampled data. The
+#' method \code{\link{confint,USL-method}} is used to get the bootstrapped
+#' confidence intervals for a model.
 #'
 #' The Universal Scalability Law can be expressed with following formula.
 #' \code{C(N)} predicts the relative capacity of the system for a given
@@ -220,10 +223,15 @@ usl.solve.nlxb <- function(model) {
 #'
 #' @return An object of class USL.
 #'
-#' @seealso \code{\link{efficiency}}, \code{\link{scalability}},
-#'   \code{\link{peak.scalability}}, \code{\link{summary}},
-#'   \code{\link{coef}}, \code{\link{fitted}}, \code{\link{residuals}},
-#'   \code{\link{deviance}}, \code{\link{confint}}
+#' @seealso \code{\link{efficiency,USL-method}},
+#'   \code{\link{scalability,USL-method}},
+#'   \code{\link{peak.scalability,USL-method}},
+#'   \code{\link{summary,USL-method}},
+#'   \code{\link{confint,USL-method}},
+#'   \code{\link{coef}},
+#'   \code{\link{deviance}},
+#'   \code{\link{fitted}},
+#'   \code{\link{residuals}}
 #'
 #' @references Neil J. Gunther. Guerrilla Capacity Planning: A Tactical
 #'   Approach to Planning for Highly Scalable Applications and Services.

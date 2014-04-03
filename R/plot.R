@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Stefan Moeding
+# Copyright (c) 2013, 2014 Stefan Moeding
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,6 @@
 #' how the system would behave with a different contention or coherency delay
 #' parameter.
 #'
-#' @usage \S4method{plot}{USL}(x, from=NULL, to=NULL, xlab=NULL, ylab=NULL, bounds=FALSE, sigma, kappa, ...)
 #' @param x The USL object to plot.
 #' @param from The start of the range over which the scalability function
 #'   will be plotted.
@@ -76,9 +75,6 @@
 #' ## Plot result from USL model for demo dataset
 #' plot(usl(throughput ~ processors, raytracer))
 #'
-#' @aliases plot,USL-method
-#' @docType methods
-#' @rdname plot-methods
 #' @export
 #'
 setMethod(

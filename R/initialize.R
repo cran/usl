@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Stefan Moeding
+# Copyright (c) 2013, 2014 Stefan Moeding
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,6 @@
 #'
 #' Initialize the object.
 #'
-#' @usage \S4method{initialize}{USL}(.Object, call, frame, regr, resp, scale.factor, sigma, kappa, boot)
 #' @param .Object The object to initialize.
 #' @param call The formula used to create the USL model.
 #' @param frame The model frame containing the variables in the model.
@@ -44,9 +43,6 @@
 #'
 #' @return An object of the specific type.
 #'
-#' @aliases initialize,USL-method
-#' @docType methods
-#' @rdname initialize-methods
 #' @keywords internal
 #'
 setMethod(

@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Stefan Moeding
+# Copyright (c) 2013, 2014 Stefan Moeding
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,6 @@
 #' \code{print} prints its argument and returns it invisibly (via
 #' \code{\link{invisible}(x)}).
 #'
-#' @usage \S4method{print}{USL}(x, digits, ...)
 #' @param x An object from class \code{USL}.
 #' @param digits Minimal number of \emph{significant} digits, see
 #'   \link{print.default}.
@@ -47,9 +46,6 @@
 #' ## Print result from USL model for demo dataset
 #' print(usl(throughput ~ processors, raytracer))
 #'
-#' @aliases print,USL-method
-#' @docType methods
-#' @rdname print-methods
 #' @export
 #'
 setMethod(
