@@ -1,5 +1,5 @@
 #
-# Test functions coef, fitted, residuals, deviance, efficiency
+# Test functions coef, fitted, residuals, df.residual, efficiency
 #
 
 library(usl)
@@ -16,6 +16,6 @@ fitted(u)
 
 residuals(u)
 
-deviance(u)
+df.residual(u)
 
 efficiency(u)

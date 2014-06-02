@@ -16,24 +16,38 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 Type 'q()' to quit R.
 
 > #
-> # Test when data frame is not ordered
+> # Test function summary
 > #
 > 
 > library(usl)
 > 
-> options(digits=3)
+> data(specsdm91)
 > 
-> dfr <- data.frame(load=c(1, 2,      4,      6,      8,      10), 
-+                   tput=c(1, 1.8868, 3.0769, 3.5294, 3.5398, 3.3557))
+> u <- usl(throughput ~ load, specsdm91)
 > 
-> dfr <- dfr[order(-dfr[1]), ]
-> 
-> try(u <- usl(tput ~ load, data=dfr))
-> 
-> coef(u)
-sigma kappa 
- 0.02  0.02 
+> summary(u, digits=3)
+
+Call:
+usl(formula = throughput ~ load, data = specsdm91)
+
+Scale Factor for normalization: 64.9 
+
+Efficiency:
+   Min     1Q Median     3Q    Max 
+0.1214 0.2254 0.3966 0.7799 1.0000 
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-70.89 -23.59  19.39  86.14 274.88 
+
+Coefficients:
+       Estimate   Std. Error
+sigma  1.705e-02  3.318e-03 
+kappa  7.892e-05  2.492e-05 
+
+Residual standard error: 140.6 on 5 degrees of freedom
+Multiple R-squared: 0.9624,	Adjusted R-squared: 0.9549
 > 
 > proc.time()
    user  system elapsed 
-  0.569   0.058   0.636 
+  0.614   0.060   0.687 

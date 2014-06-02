@@ -24,12 +24,6 @@
 
 
 ##############################################################################
-# Enable class "boot" to be used as a formal class
-#
-setOldClass("boot")
-
-
-##############################################################################
 #' Class "\code{USL}" for Universal Scalability Law models
 #'
 #' This class encapsulates the Universal Scalability Law. Use the function
@@ -41,10 +35,11 @@ setOldClass("boot")
 #' @slot resp The name of the response variable.
 #' @slot scale.factor The scale factor used to create the model.
 #' @slot coefficients The coefficients sigma and kappa of the model.
-#' @slot boot A bootstrap object used to estimate confidence intervals for the parameters sigma and kappa.
-#' @slot deviance The deviance (residual sum of squares).
+#' @slot coef.std.err The standard errors for the coefficients sigma and kappa.
+#' @slot coef.names A vector with the names of the coefficients.
 #' @slot fitted The fitted values of the model. This is a vector.
 #' @slot residuals The residuals of the model. This is a vector.
+#' @slot df.residual The degrees of freedom of the model.
 #' @slot r.squared Coefficient of determination of the model.
 #' @slot adj.r.squared Adjusted coefficient of determination.
 #' @slot efficiency The efficiency, e.g. speedup per processor.
@@ -61,15 +56,18 @@ setClass("USL",
                         resp          = "character",
                         scale.factor  = "numeric",
                         coefficients  = "vector",
-                        boot          = "boot",
-                        deviance      = "numeric",
+                        coef.std.err  = "vector",
+                        coef.names    = "vector",
                         fitted        = "vector",
                         residuals     = "vector",
+                        df.residual   = "integer",
                         r.squared     = "numeric",
                         adj.r.squared = "numeric",
                         efficiency    = "vector",
                         na.action     = "character"),
-         prototype(r.squared     = 0,
+         prototype(coef.names    = c("sigma", "kappa"),
+                   df.residual   = 0L,
+                   r.squared     = 0,
                    adj.r.squared = 0,
                    na.action     = "na.omit"),
          validity = function(object) {
@@ -128,7 +126,9 @@ setClass("USL",
 
            if (any(object@efficiency > 1)) {
              # Capacity grows more than load: can this really be?
-             warning("'data' shows efficiency > 1; this looks almost too good to be true")
+             warning("'data' shows efficiency > 1; ",
+                     "this looks almost too good to be true",
+                     call. = FALSE)
            }
 
            if (length(err) == 0) return(TRUE) else return(err)

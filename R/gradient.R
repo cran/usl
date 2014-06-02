@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Stefan Moeding
+# Copyright (c) 2014 Stefan Moeding
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,34 +24,39 @@
 
 
 ##############################################################################
-#' Finish USL object after initialize
+#' Calculate gradient for the universal scalability function
 #'
-#' \code{finish} updates a USL object and sets additional parameters after
-#' the object has been initialized.
+#' The implementation of this function has been adopted from the generated
+#' output of the \code{\link{deriv}} function.
 #'
-#' This is a package internal function.
+#' @param x The USL object.
+#' 
+#' @return The gradient matrix.
 #'
-#' @param .Object A USL model object returned from \code{new}.
-#'
-#' @return An object of class USL with updated model parameters.
-#'
-#' @seealso \code{\link{usl}}, \code{\link{initialize,USL-method}}
+#' @seealso \code{\link{usl}}
 #'
 #' @keywords internal
 #'
-finish <- function(.Object) {
-  nam <- row.names(.Object@frame)
-  y.observed <- .Object@frame[, .Object@resp, drop=TRUE]
-
-  .Object@fitted    <- structure(predict(.Object), names = nam)
-  .Object@residuals <- structure(y.observed - .Object@fitted, names = nam)
-  .Object@deviance  <- sum(.Object@residuals ^ 2)
-
-  .Object@r.squared <- 1 - (.Object@deviance / sum((y.observed - mean(y.observed)) ^ 2))
-
-  n <- length(y.observed) # sample size
-  p <- 1                  # number of regressors
-  .Object@adj.r.squared <- 1 - (1 - .Object@r.squared) * ((n-1) / (n-p-1))
-
-  return(.Object)
+gradient.usl <- function(x) {
+  sigma = x@coefficients['sigma']
+  kappa = x@coefficients['kappa']
+  scale.factor = x@scale.factor
+  n = x@frame[, x@regr, drop = TRUE]
+  
+  # Based on the output of:
+  # deriv(~ X0 * n / (1 + (sigma * (n-1)) + (kappa * n * (n-1))), # rhs
+  #       c('sigma', 'kappa'),                                    # params
+  #       function(sigma, kappa, n, X0){}                         # args
+  
+  term1 <- n - 1
+  term2 <- 1 + (sigma * term1) + (kappa * n * term1)
+  term3 <- n * term1
+  term4 <- term2 ^ 2
+  
+  grad.sigma <- -(scale.factor * term3 / term4)
+  grad.kappa <- -(scale.factor * (n * term3) / term4)
+  
+  matrix(c(grad.sigma, grad.kappa),
+         nrow = length(n), 
+         dimnames = list(1:length(n), x@coef.names))
 }

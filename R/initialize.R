@@ -38,8 +38,6 @@
 #'     model.
 #' @param sigma The contention parameter of the model.
 #' @param kappa The coherency delay parameter of the model.
-#' @param boot A bootstrap object used to estimate confidence intervals for
-#'     the parameters sigma and kappa.
 #'
 #' @return An object of the specific type.
 #'
@@ -48,16 +46,16 @@
 setMethod(
   f = "initialize",
   signature = "USL",
-  definition = function(.Object, call, frame, regr, resp, scale.factor, sigma, kappa, boot) {
+  definition = function(.Object, call, frame, regr, resp, scale.factor, sigma, kappa) {
     .Object@call         <- call
-    .Object@coefficients <- structure(c(sigma, kappa), names = c("sigma", "kappa"))
+    .Object@coefficients <- structure(c(sigma, kappa), names = .Object@coef.names)
     .Object@frame        <- frame
     .Object@regr         <- regr
     .Object@resp         <- resp
     .Object@scale.factor <- scale.factor
     .Object@efficiency   <- structure(frame[[resp]] / scale.factor / frame[[regr]],
                                       names = frame[, regr])
-    .Object@boot         <- boot
+    .Object@df.residual  <- length(frame[[resp]]) - 2L
 
     # Call inspector
     validObject(.Object)

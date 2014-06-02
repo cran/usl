@@ -117,8 +117,8 @@ usl.solve.nls <- function(model) {
 #' Solve a USL model using non linear regression
 #'
 #' This function solves a USL model using non linear regression with least
-#' squares. It uses the function \code{\link{nlxb}} to perform the
-#' calculation.
+#' squares. It uses the function \code{\link{nlxb}} from the \pkg{nlmrt}
+#' package to perform the calculation.
 #'
 #' @param model A data frame with two columns containing the values of the
 #'   predictor variable in the first column and the values of the response
@@ -193,15 +193,6 @@ usl.solve.nlxb <- function(model) {
 #'     expected to be more robust than the \code{nls} method.
 #' }
 #'
-#' The parameter \code{R} defines the number of bootstrap replicates used to
-#' estimate the parameter confidence intervals. Depending on the number of
-#' observations the default 50 may be too low to get reasonable results. See
-#' \code{\link{boot}} and \code{\link{boot.ci}} for details. Bootstrapping with
-#' \code{method="default"} can give overly bad results as the method only works
-#' when the normalization factor can be calculated from the sampled data. The
-#' method \code{\link{confint,USL-method}} is used to get the bootstrapped
-#' confidence intervals for a model.
-#'
 #' The Universal Scalability Law can be expressed with following formula.
 #' \code{C(N)} predicts the relative capacity of the system for a given
 #' load \code{N}:
@@ -218,8 +209,8 @@ usl.solve.nlxb <- function(model) {
 #'   \code{usl} is called.
 #' @param method Character value specifying the method to use. The possible
 #'   values are described unter 'Details'.
-#' @param R The number of bootstrap replicate used to estimate the confidence
-#'   intervals for the parameters \code{sigma} and \code{kappa}.
+#' @param R This parameter is no longer used and will be removed in the next
+#'   version.
 #'
 #' @return An object of class USL.
 #'
@@ -227,11 +218,12 @@ usl.solve.nlxb <- function(model) {
 #'   \code{\link{scalability,USL-method}},
 #'   \code{\link{peak.scalability,USL-method}},
 #'   \code{\link{summary,USL-method}},
+#'   \code{\link{predict,USL-method}},
 #'   \code{\link{confint,USL-method}},
 #'   \code{\link{coef}},
-#'   \code{\link{deviance}},
 #'   \code{\link{fitted}},
-#'   \code{\link{residuals}}
+#'   \code{\link{residuals}},
+#'   \code{\link{df.residual}}
 #'
 #' @references Neil J. Gunther. Guerrilla Capacity Planning: A Tactical
 #'   Approach to Planning for Highly Scalable Applications and Services.
@@ -264,10 +256,9 @@ usl.solve.nlxb <- function(model) {
 #' plot(raytracer)
 #' plot(usl.model, add=TRUE)
 #'
-#' @importFrom boot boot
 #' @export
 #'
-usl <- function(formula, data, method = "default", R = 50) {
+usl <- function(formula, data, method = "default", R) {
   ## canonicalize the arguments
   formula <- as.formula(formula)
 
@@ -317,26 +308,43 @@ usl <- function(formula, data, method = "default", R = 50) {
   # Solve the model for the model frame
   model.result <- usl.solve(model.input)
 
-  # Bootstrap confidence intervals for model parameters sigma & kappa
-  boot.func <- function(model.input, indices) {
-    # Use tryCatch to ignore all errors when solving the model
-    result <- tryCatch(usl.solve(model.input[indices, ]),
-                       error = function(err) list(sigma = NA, kappa = NA))
-
-    # Coefficients must not be negative
-    if (any(result < 0, na.rm = TRUE)) result <- list(sigma = NA, kappa = NA)
-
-    return(c(result[['sigma']], result[['kappa']]))
+  # Warn about old parameter usage
+  if (!missing(R)) {
+    warning("parameter 'R' is no longer used")
   }
-
-  boot.obj <- boot(data = model.input, statistic = boot.func, R = R)
 
   # Create object for class USL
   .Object <- new(Class = "USL", call, frame, regr, resp,
                  model.result[['scale.factor']],
-                 model.result[['sigma']], model.result[['kappa']],
-                 boot.obj)
+                 model.result[['sigma']], model.result[['kappa']])
 
-  # Finish the object and return it
-  return(finish(.Object))
+  # Finish building the USL object
+  nam <- row.names(frame)
+
+  y.obs <- frame[, resp, drop = TRUE]
+  y.fit <- predict(.Object)
+  y.res <- y.obs - y.fit
+
+  .Object@fitted    <- structure(y.fit, names = nam)
+  .Object@residuals <- structure(y.res, names = nam)
+
+  n <- length(y.obs) # sample size
+  p <- 1             # number of regressors
+
+  .Object@r.squared     <- 1 - (sum(y.res ^ 2) / sum((y.obs - mean(y.obs)) ^ 2))
+  .Object@adj.r.squared <- 1 - (1 - .Object@r.squared) * ((n-1) / (n-p-1))
+
+  # residual variance
+  df <- df.residual(.Object)
+  resvar <- if(df <= 0) NaN else sum(y.res ^ 2) / df
+  
+  # Build gradient matrix
+  grad <- gradient.usl(.Object)
+
+  XtXinv <- solve(t(grad) %*% grad)
+
+  # Standard error of coefficients
+  .Object@coef.std.err <- sqrt(diag(XtXinv) * resvar)
+
+  return(.Object)
 }

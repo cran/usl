@@ -51,14 +51,14 @@
 setMethod(
   f = "print",
   signature = "USL",
-  definition = function(x, digits = max(3, getOption("digits") - 3), ...) {
+  definition = function(x, digits = max(3L, getOption("digits") - 3L), ...) {
     qnames <- c("Min", "1Q", "Median", "3Q", "Max")
 
     cat("\nCall:\n",
         paste(deparse(x@call), sep = "\n", collapse = "\n"), "\n", sep = "")
 
     cat("\nScale Factor for normalization:",
-        formatC(x@scale.factor, digits = digits), "\n")
+        formatC(x@scale.factor, digits = digits, width = 1), "\n")
 
     cat("\nEfficiency:\n")
     zz <- zapsmall(quantile(x@efficiency), digits + 1)
@@ -68,14 +68,27 @@ setMethod(
     zz <- zapsmall(quantile(x@residuals), digits + 1)
     print(structure(zz, names = qnames), digits = digits, ...)
 
-    if(length(coef(x))) {
-      cat("\nCoefficients:\n")
-      print.default(format(coef(x), digits = digits),
-                    print.gap = 2, quote = FALSE)
-    } else cat("No coefficients\n")
+    cat("\nCoefficients:\n")
+    tval <- x@coefficients / x@coef.std.err
+    pval <- 2 * pt(abs(tval), x@df.residual, lower.tail = FALSE)
+
+    para <- c(x@coefficients, x@coef.std.err, tval, pval)
+    rows <- attributes(x@coefficients)$names
+    cols <- c("Estimate", "Std. Error", "t value", "Pr(>|t|)")
+
+    para.mat <- matrix(para, nrow = 2, dimnames = list(rows, cols))
+
+    # Print only estimate & std error for now
+    print.default(format(para.mat[ ,1:2], digits = digits),
+                  print.gap = 2, quote = FALSE)
+
+    se <- ifelse(x@df.residual <= 0, NaN, sqrt(sum(x@residuals ^ 2) / x@df.residual))
+
+    cat("\nResidual standard error:",
+        format(signif(se, digits)), "on", x@df.residual, "degrees of freedom")
 
     cat("\nMultiple R-squared:", formatC(x@r.squared, digits = digits))
-    cat(",\tAdjusted R-squared:",formatC(x@adj.r.squared, digits = digits))
+    cat(",\tAdjusted R-squared:", formatC(x@adj.r.squared, digits = digits))
 
     cat("\n")
     invisible(x)
