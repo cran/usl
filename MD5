@@ -1,7 +1,7 @@
-463d4979853f9999aff25a0f44b10066 *DESCRIPTION
+1681b6775c45993a94544096aa1400b1 *DESCRIPTION
 449c0b2eab1ca83a467c669148b8ff22 *LICENSE
 55e360cee870d08e36c75f090d79ec81 *NAMESPACE
-6f73bcde37ca721f4162c64401bb43e9 *NEWS
+3d87c356e0337962e1dbdbd37433d1f3 *NEWS
 722e7d95537e6c37c60f984255b9545d *R/AllClasses.R
 9ad70e93a34d49bd27a2571e5a06a384 *R/AllGenerics.R
 493f061f06b7cfe1c028968206f974c1 *R/confint.R
@@ -23,8 +23,8 @@ df547d9c71396dcdb2dafb783ac452c5 *data/oracledb.rda
 fef71b7836a5f71cc6963b1002adb13f *data/raytracer.rda
 5f684de2d603fc6e07c0b249adf679b4 *data/specsdm91.rda
 2ad717519fa9806e91a4699ccc86f94f *inst/doc/usl.R
-11e8381a74356183a6b0aa7e5e7a7ee9 *inst/doc/usl.Rnw
-adb82fb64836abab360ecfab97e8a395 *inst/doc/usl.pdf
+4331b35b2ccda27655fd4a63b386214f *inst/doc/usl.Rnw
+408d6dc9f8c6138f9169b195acdab024 *inst/doc/usl.pdf
 2e0d3b8105941310274a0294f3eae667 *man/USL-class.Rd
 db56eb27f529220ca0cbfd16018a5d73 *man/cash-USL-method.Rd
 bba040cb1760b846192cc988bec5e68d *man/confint-USL-method.Rd
@@ -56,13 +56,13 @@ bb9e8fd3579eef35c0fe70dc518e56ab *tests/t02.Rout.save
 d06f5748112de8db3252d873e3ca1c5d *tests/t04.Rout.save
 d1347fb6ddddbe395a8cd23a57592e89 *tests/t05.R
 54553296cf348c6bb5a432c288d6d53f *tests/t05.Rout.save
-1c31dd606f0f9afdc394fa2530823f3d *tests/t06.R
-8e5b4f6b5efc9e30854474551e05d667 *tests/t06.Rout.save
+47fcff65f94cd019f414381c6a9201d3 *tests/t06.R
+d2e47f857aac0d180c7b8d009518d674 *tests/t06.Rout.save
 de580962697ed7001f86abc4d086425a *tests/t07.R
 2281580d4d5e30d0903fd91b02220279 *tests/t07.Rout.save
 774e721009bcfac510bb21e89b687c15 *tests/t08.R
 fc3dfafd597456fff08ac436974bcf25 *tests/t08.Rout.save
 2dc28a3554c0f6f3ade966bd30021bc0 *tests/t09.R
 4d10fb016534af0db54f66117f568c94 *tests/t09.Rout.save
-11e8381a74356183a6b0aa7e5e7a7ee9 *vignettes/usl.Rnw
+4331b35b2ccda27655fd4a63b386214f *vignettes/usl.Rnw
 c1b009b50181faf90822bc3fbe9d2f08 *vignettes/usl.bib
