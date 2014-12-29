@@ -1,11 +1,11 @@
 \documentclass[pagesize=auto,parskip=half,toc=bib]{scrartcl}
-%\VignetteIndexEntry{Using the usl package to analyze system scalability}
+%\VignetteIndexEntry{Using the USL Package to Analyze System Scalability}
 %\VignetteDepends{usl}
 %\VignetteKeyword{usl}
 %\VignettePackage{usl}
 
 \subject{Using the usl package}
-\title{Analyze system scalability in R with the Universal Scalability Law}
+\title{Analyze System Scalability in R with the Universal Scalability Law}
 \author{Stefan M\"oding}
 
 \usepackage{fixltx2e}
