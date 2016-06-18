@@ -1,34 +1,29 @@
 \documentclass[pagesize=auto,parskip=half,toc=bib]{scrartcl}
+%\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{Using the USL Package to Analyze System Scalability}
 %\VignetteDepends{usl}
 %\VignetteKeyword{usl}
+%\VignetteKeyword{scalability}
 %\VignettePackage{usl}
 
 \subject{Using the usl package}
 \title{Analyze System Scalability in R with the Universal Scalability Law}
 \author{Stefan M\"oding}
 
-\usepackage{fixltx2e}
-\usepackage{microtype}
-
-\usepackage{Sweave}
-\SweaveOpts{engine=R, eps=FALSE, keep.source=FALSE, height=3.8}
-
-\DefineVerbatimEnvironment{Scode}{Verbatim}{xleftmargin=2em}
-\DefineVerbatimEnvironment{Sinput}{Verbatim}{xleftmargin=2em}
-\DefineVerbatimEnvironment{Soutput}{Verbatim}{xleftmargin=2em}
-\fvset{listparameters={\setlength{\topsep}{0pt}}}
-\renewenvironment{Schunk}{\vspace{\topsep}}{\vspace{\topsep}}
-
-% Encoding, fonts & language
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage[english]{babel}
+% Fonts, encoding & language
 \usepackage[utopia]{mathdesign}
-\usepackage{beramono}
+\usepackage[scaled=0.85]{beramono}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+
+% Adobe Helvetica
+\renewcommand{\sfdefault}{phv}
 
 \usepackage{amsmath}
+\usepackage{microtype}
 \usepackage{nicefrac}
+\usepackage[all]{nowidow}
 
 % Package hyperref
 \usepackage[pdfusetitle,hidelinks]{hyperref}
@@ -36,29 +31,47 @@
 
 \hypersetup{pdfkeywords={Scalability,Universal Scalability Law,USL,R}}
 
+% Package cleveref (after hyperref)
+\usepackage{cleveref}
+
 % Define shortcut commands
 \newcommand{\R}{{\normalfont\textsf{R}}}
 \newcommand{\usl}{{\normalfont\textsf{usl}}}
 \newcommand{\kbd}[1]{{\normalfont\textit{\texttt{#1}}}}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+<<echo=FALSE>>=
+library(knitr)
+
+options(prompt="R> ", scipen=4, digits=4, width=78)
+options(str=strOptions(strict.width='cut'), show.signif.stars=FALSE)
+
+opts_knit$set(progress=FALSE, verbose=FALSE)
+
+knit_hooks$set(small.mar=function(before, options, envir) {
+if (before && options$fig.show != 'none')
+  par(mar=c(4.1, 4.1, 1.1, 2.1))
+})
+
+opts_chunk$set(prompt=TRUE, comment=NA, tidy=FALSE, warning=FALSE)
+opts_chunk$set(size='footnotesize', out.width='0.97\\textwidth')
+opts_chunk$set(fig.width=7, fig.height=3.6, fig.align='center')
+opts_chunk$set(fig.path='usl-', small.mar=TRUE)
+
+@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
-<<options, echo=FALSE>>=
-options(prompt="R> ", scipen=4, digits=3, width=66, show.signif.stars=FALSE)
-options(SweaveHooks=list(fig = function() par(mar = c(4.1, 4.1, 2.1, 2.1))))
-set.seed(42, kind = "default", normal.kind = "default")
-@
 
 \maketitle
 
 \begin{abstract}\noindent
 The Universal Scalability Law is used to quantify the scalability of hardware
 or software systems. It uses sparse measurements from an existing system to
-predict the throughput for different loads and can be used to learn more about
-the scalability limitations of the system. This document introduces the `\usl'
-package for \R{} and shows how easily it can be used to perform the relevant
-calculations.
+predict the throughput for different loads and can be used to learn more
+about the scalability limitations of the system. This document introduces the
+\usl{} package for \R{} and shows how easily it can be used to perform the
+relevant calculations.
 \end{abstract}
 
 \tableofcontents
@@ -67,7 +80,7 @@ calculations.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Version}
 
-This document describes version \Sexpr{packageVersion("usl")} of the `\usl'
+This document describes version \Sexpr{packageVersion("usl")} of the \usl{}
 package.
 
 
@@ -79,8 +92,8 @@ that meets the requirements. A critical point during the design is the
 scalability of the system.
 
 Informally scalability can be defined as the ability to support a growing
-amount of work. A system is said to scale if it handles the changing demand or
-hardware environment in a reasonable efficient and practical way.
+amount of work. A system is said to scale if it handles the changing demand
+or hardware environment in a reasonable efficient and practical way.
 
 Scalability can have two facets with respect to a computer system. On the one
 hand, there is software scalability where the focus is about how the system
@@ -94,8 +107,8 @@ to allow the quantification of scalability for the purpose of capacity
 planning. It provides an analytic model for the scalability of a computer
 system.
 
-A comprehensive introduction to the Universal Scalability Law
-including the mathematical grounding has been published in \cite{Gun07}.
+A comprehensive introduction to the Universal Scalability Law including the
+mathematical grounding has been published in \cite{Gun07}.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -103,10 +116,10 @@ including the mathematical grounding has been published in \cite{Gun07}.
 
 Dr.~Gunther shows in \cite{Gun07} how the scalability of every computer
 system can be described by a common rational function. This function is
-\emph{universal} in the sense that it does not assume any specific type
-of software, hardware or system architecture.
+\emph{universal} in the sense that it does not assume any specific type of
+software, hardware or system architecture.
 
-\autoref{eqn:usl} has the Universal Scalability Law where $C(N) = X(N) / X(1)$
+\Cref{eqn:usl} has the Universal Scalability Law where $C(N) = X(N) / X(1)$
 is the relative capacity given by the ratio of the measured throughput $X(N)$
 for load $N$ to the throughput $X(1)$ for load $1$.
 
@@ -118,12 +131,12 @@ The denominator consists of three terms that all have a specific physical
 interpretation:
 
 \begin{labeling}{Concurrency:}
-\item[Concurrency:] The first term models linear scalability that would
-  exist if the different parts of the system (processors, threads \dots)
-  could work without any interference caused by their interaction.
-\item[Contention:] The second term of the denominator refers to the contention
-  between different parts of the system. Most common are issues caused by
-  serialization or queueing effects.
+\item[Concurrency:] The first term models linear scalability that would exist
+  if the different parts of the system (processors, threads \dots) could work
+  without any interference caused by their interaction.
+\item[Contention:] The second term of the denominator refers to the
+  contention between different parts of the system. Most common are issues
+  caused by serialization or queueing effects.
 \item[Coherency:] The last term represents the delay induced by keeping the
   system in a coherent and consistent state. This is necessary when writable
   data is shared in different parts of the system. Predominant factors for
@@ -139,53 +152,54 @@ Due to the quadratic characteristic of the coherency term there will be a
 point where the throughput of the system will start to go retrograde, i.e.,
 will start to decrease with further increasing load.
 
-In \cite{Gun07} Dr.~Gunther proves that \autoref{eqn:usl} is reduced to
-Amdahl's Law for $\kappa = 0$. Therefore the Universal Scalability Law can be
-seen as a generalization of Amdahl's Law for speedup in parallel computing.
+In \cite{Gun07} Dr.~Gunther proves that \cref{eqn:usl} is reduced to Amdahl's
+Law for $\kappa = 0$. Therefore the Universal Scalability Law can be seen as
+a generalization of Amdahl's Law for speedup in parallel computing.
 
 We could solve this nonlinear equation to estimate the coefficients $\sigma$
 and $\kappa$ using a sparse set of measurements for the throughput $X_i$ at
 different loads $N_i$. The computations used to solve the equation for the
 measured values are discussed in \cite{Gun07}.
 
-The `\usl' package has been created to subsume the computation into one simple
-function call. This greatly reduces the manual work that previously was needed
-to perform the scalability analysis.
+The \usl{} package has been created to subsume the computation into one
+simple function call. This greatly reduces the manual work that previously
+was needed to perform the scalability analysis.
 
 The function provided by the package also includes some sanity checks to help
 the analyst with the data quality of the measurements.
 
 Note that in \cite{Gun07} the coefficients are called $\sigma$ and $\kappa$
 when hardware scalability is evaluated but $\alpha$ and $\beta$ when software
-scalability is analyzed. The `\usl' package only uses \texttt{sigma} and
+scalability is analyzed. The \usl{} package only uses \texttt{sigma} and
 \texttt{kappa} as names of the coefficients.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Examples of Scalability Analysis}
 
-The following sections present some examples of how the `\usl' package can
-be used when performing a scalability analysis. They also explain typical
+The following sections present some examples of how the \usl{} package can be
+used when performing a scalability analysis. They also explain typical
 function calls and their arguments.
 
 \subsection{Case Study: Hardware Scalability}
 
-The `\usl' package contains a demo dataset with benchmark measurements from a
+The \usl{} package contains a demo dataset with benchmark measurements from a
 raytracer software\footnote{\url{http://sourceforge.net/projects/brlcad/}}.
 The data was gathered on an SGI~Origin~2000 with 64 R12000 processors running
 at 300~MHz.
 
-A number of reference images with different levels of complexity were computed
-for the benchmark. The measurements contain the average number of calculated
-ray-geometry intersections per second for the number of used processors.
-
-It is important to note that with changing hardware configurations the relative
-number of \emph{homogeneous} application processes per processor is to be held
-constant. So when $k$ application processes were used for the $N$ processor
-benchmark then $2k$ processes must be used to get the result for $2N$
+A number of reference images with different levels of complexity were
+computed for the benchmark. The measurements contain the average number of
+calculated ray-geometry intersections per second for the number of used
 processors.
 
-Start the analysis by loading the `\usl' package and look at the supplied
+It is important to note that with changing hardware configurations the
+relative number of \emph{homogeneous} application processes per processor is
+to be held constant. So when $k$ application processes were used for the $N$
+processor benchmark then $2k$ processes must be used to get the result for
+$2N$ processors.
+
+Start the analysis by loading the \usl{} package and look at the supplied
 dataset.
 
 <<>>=
@@ -196,32 +210,27 @@ raytracer
 
 The data shows the throughput for different hardware configurations covering
 the available range from one to 64 processors. We can easily see that the
-benefit for switching from one processor to four processors is much larger than
-the gain for upgrading from 48 to 64 processors.
+benefit for switching from one processor to four processors is much larger
+than the gain for upgrading from 48 to 64 processors.
 
 Create a simple scatterplot to get a grip on the data.
 
-<<rtplot1>>=
+<<'rtplot1', fig.show='hide'>>=
 plot(throughput ~ processors, data = raytracer)
 @
 
-\autoref{fig:rtplot1} shows the throughput of the system for the different
+\Cref{fig:rtplot2} shows the throughput of the system for the different
 number of processors. This plot is a typical example for the effects of
 \emph{diminishing returns}\label{dimret}, because it clearly shows how the
 benefit of adding more processors to the system gets smaller for higher
 numbers of processors.
 
-\begin{figure}[hbt]
-\centering
-<<fig=TRUE, echo=FALSE>>=
+<<'rtplot2', echo=FALSE, fig.cap='Measured throughput of a raytracing software in relation to the number of available processors'>>=
 <<rtplot1>>
 @
-\caption{Measured throughput of a raytracing software in relation to the number of available processors}
-\label{fig:rtplot1}
-\end{figure}
 
-Our next step builds the USL model from the dataset. The \kbd{usl()}
-function creates an S4 object that encapsulates the computation.
+Our next step builds the USL model from the dataset. The \kbd{usl()} function
+creates an S4 object that encapsulates the computation.
 
 The first argument is a formula with a symbolic description of the model we
 want to analyze. In this case we would like to analyze how the ``throughput''
@@ -246,15 +255,16 @@ information.
 \item It also includes the scale factor used for normalization. The scale
   factor is used internally to adjust the measured values to a common scale.
   It is equal to the value $X(1)$ of the measurements.
-\item The efficiency tells us something about the ratio of useful work that is
-  performed per processor. It is obvious that two processors might be able to
-  handle twice the work of one processor but not more. Calculating the ratio of
-  the workload per processor should therefore always be less or equal to $1$.
-  In order to verify this, we can use the distribution of the efficiency values
-  shown in the summary.
-\item We are performing a regression on the data to calculate the coefficients
-  and therefore we determine the residuals for the fitted values. The
-  distribution of the residuals is also given as part of the summary.
+\item The efficiency tells us something about the ratio of useful work that
+  is performed per processor. It is obvious that two processors might be able
+  to handle twice the work of one processor but not more. Calculating the
+  ratio of the workload per processor should therefore always be less or
+  equal to $1$. In order to verify this, we can use the distribution of the
+  efficiency values shown in the summary.
+\item We are performing a regression on the data to calculate the
+  coefficients and therefore we determine the residuals for the fitted
+  values. The distribution of the residuals is also given as part of the
+  summary.
 \item The coefficients $\sigma$ and $\kappa$ are the result that we are
   essentially interested in. They tell us the magnitude of the contention and
   coherency effects within the system.
@@ -263,8 +273,8 @@ information.
   \Sexpr{floor(100*summary(usl.model)$r.squared)} percent of the data.
 \end{itemize}
 
-The function \kbd{efficiency()} extracts the efficiency values from the
-model and allows us to have a closer look at the specific efficiencies of the
+The function \kbd{efficiency()} extracts the efficiency values from the model
+and allows us to have a closer look at the specific efficiencies of the
 different processor configurations.
 
 <<>>=
@@ -272,25 +282,17 @@ efficiency(usl.model)
 @
 
 A bar plot is useful to visually compare the decreasing efficiencies for the
-configurations with an increasing number of processors. \autoref{fig:rtbarplot}
+configurations with an increasing number of processors. \Cref{fig:rtbarplot}
 shows the output diagram.
 
-<<rtbarplot>>=
+<<'rtbarplot', fig.cap='Rate of efficiency per processor for different numbers of processors running the raytracing software'>>=
 barplot(efficiency(usl.model), ylab = "efficiency / processor", xlab = "processors")
 @
 
-\begin{figure}[hbt]
-\centering
-<<fig=TRUE, echo=FALSE>>=
-<<rtbarplot>>
-@
-\caption{Rate of efficiency per processor for different numbers of processors running the raytracing software}
-\label{fig:rtbarplot}
-\end{figure}
-
 The efficiency can be used for a first validation and sanity check of the
-measured values. Values larger than $1.0$ usually need a closer investigation.
-It is also suspicious if the efficiency gets bigger when the load increases.
+measured values. Values larger than $1.0$ usually need a closer
+investigation. It is also suspicious if the efficiency gets bigger when the
+load increases.
 
 The model coefficients $\sigma$ and $\kappa$ can be retrieved with the
 \kbd{coef()} function.
@@ -299,36 +301,27 @@ The model coefficients $\sigma$ and $\kappa$ can be retrieved with the
 coef(usl.model)
 @
 
-The corresponding confidence intervals for the model coefficients are returned
-by calling the \kbd{confint()} function.
+The corresponding confidence intervals for the model coefficients are
+returned by calling the \kbd{confint()} function.
 
 <<>>=
 confint(usl.model, level = 0.95)
 @
 
-Earlier releases of the `\usl' package used bootstrapping to estmate the
+Earlier releases of the \usl{} package used bootstrapping to estmate the
 confidence intervals. This has been changed since bootstrapping with a small
 sample size may not give the desired accuracy. Currently the confidence
 intervals are calculated from the standard errors of the parameters.
 
 To get an impression of the scalability function we can use the \kbd{plot()}
 function and create a combined graph with the original data as dots and the
-calculated scalability function as a solid line. \autoref{fig:rtplot2} has the
+calculated scalability function as a solid line. \Cref{fig:rtplot3} has the
 result of that plot.
 
-<<rtplot2>>=
+<<'rtplot3', fig.cap='Throughput of a raytracing software using different numbers of processors'>>=
 plot(throughput ~ processors, data = raytracer, pch = 16)
 plot(usl.model, add = TRUE)
 @
-
-\begin{figure}[hbt]
-\centering
-<<fig=TRUE, echo=FALSE>>=
-<<rtplot2>>
-@
-\caption{Throughput of a raytracing software using different numbers of processors}
-\label{fig:rtplot2}
-\end{figure}
 
 SGI marketed the Origin 2000 with up to 128 processors. Let's assume that
 going from 64 to 128 processors does not introduce any additional limitations
@@ -361,7 +354,8 @@ In this section we will perform an analysis of a SPEC benchmark. A Sun
 SPARCcenter 2000 with 16 CPUs was used in October 1994 for the SDM91
 benchmark\footnote{\url{http://www.spec.org/osg/sdm91/results/results.html}}.
 The benchmark simulates a number of users working on a UNIX server (editing
-files, compiling \dots) and measures the number of script executions per hour.
+files, compiling \dots) and measures the number of script executions per
+hour.
 
 First, select the demo dataset with the data from the SPEC SDM91 benchmark.
 
@@ -392,22 +386,23 @@ There are currently three possible values for the \texttt{method} parameter:
   degree polynomial. It can only be used if the data set contains a value for
   the normalization where the ``throughput'' equals $1$ for one measurement.
   This is the original procedure introduced in chapter 5.2.3 of \cite{Gun07}.
-\item[\texttt{nls}:] This method uses the \kbd{nls()} function of the
-  stats package for a nonlinear regression model. It estimates not only
-  the coefficients $\sigma$ and $\kappa$ but also the scale factor for the
+\item[\texttt{nls}:] This method uses the \kbd{nls()} function of the stats
+  package for a nonlinear regression model. It estimates not only the
+  coefficients $\sigma$ and $\kappa$ but also the scale factor for the
   normalization. The nonlinear regression uses constraints for its parameters
   which means the ``port'' algorithm is used internally to solve the model.
   So all restrictions of the ``port'' algorithm apply.
 \item[\texttt{nlxb}:] A nonlinear regression model is also used in this case.
   But instead of the \kbd{nls()} function it uses the \kbd{nlxb()} function
-  from the nlmrt package (see \cite{R:nlmrt}). This method also estimates both
-  coefficients and the normalization factor. It is expected to be more robust
-  than the \texttt{nls} method.
+  from the nlmrt package (see \cite{R:nlmrt}). This method also estimates
+  both coefficients and the normalization factor. It is expected to be more
+  robust than the \texttt{nls} method.
 \end{labeling}
 
-Keep in mind that if there is no measurement where ``load'' equals $1$ then the
-default method does not work and an error message will be printed. In this case
-one of the remaining methods must be used.
+Keep in mind that if there is no measurement where ``load'' equals $1$ then
+the default method does not work and a warning message will be printed. In
+this case the \kbd{usl()} function will automatically apply the \texttt{nlxb}
+method.
 
 We also use the \kbd{summary()} function to look at the details for the
 analysis.
@@ -418,15 +413,15 @@ summary(usl.model)
 
 Looking at the coefficients we notice that $\sigma$ is about
 \Sexpr{signif(coef(usl.model)[['sigma']], 2)} and $\kappa$ is about
-\Sexpr{signif(coef(usl.model)[['kappa']], 1)}. The parameter $\sigma$ indicates
-that about \Sexpr{signif(100*coef(usl.model)[['sigma']], 2)} percent of the
-execution time is strictly serial. Note that this serial fraction is also
-recognized in Amdahl's Law.
+\Sexpr{signif(coef(usl.model)[['kappa']], 1)}. The parameter $\sigma$
+indicates that about \Sexpr{signif(100*coef(usl.model)[['sigma']], 2)}
+percent of the execution time is strictly serial. Note that this serial
+fraction is also recognized in Amdahl's Law.
 
 We hypothesize that a proposed change to the system --- maybe a redesign of
-the cache architecture or the elimination of a point to point communication ---
-could reduce $\kappa$ by half and want to predict how the scalability of the
-system would change.
+the cache architecture or the elimination of a point to point communication
+--- could reduce $\kappa$ by half and want to predict how the scalability of
+the system would change.
 
 We can calculate the point of maximum scalability for the current system and
 for the hypothetical system with the \kbd{peak.scalability()} function.
@@ -436,15 +431,15 @@ peak.scalability(usl.model)
 peak.scalability(usl.model, kappa = 0.00005)
 @
 
-The function accepts the optional arguments \texttt{sigma} and \texttt{kappa}.
-They are useful to do a what-if analysis. Setting these parameters override
-the calculated model parameters and show how the system would behave with a
-different contention or coherency coefficient.
+The function accepts the optional arguments \texttt{sigma} and
+\texttt{kappa}. They are useful to do a what-if analysis. Setting these
+parameters override the calculated model parameters and show how the system
+would behave with a different contention or coherency coefficient.
 
 In this case we learn that the point of peak scalability would move from
 around \Sexpr{signif(peak.scalability(usl.model), 3)} to about
-\Sexpr{signif(peak.scalability(usl.model, kappa=0.00005), 3)} if we would
-be able to actually build the system with the assumed optimization.
+\Sexpr{signif(peak.scalability(usl.model, kappa=0.00005), 3)} if we would be
+able to actually build the system with the assumed optimization.
 
 Both calculated scalability functions can be plotted using the \kbd{plot()}
 or \kbd{curve()} functions. The following commands create a graph of the
@@ -452,7 +447,7 @@ original data points and the derived scalability functions. To completely
 include the scalability of the hypothetical system, we have to increase the
 range of the plotted values with the first command.
 
-<<spplot1>>=
+<<'spplot1', fig.show='hide'>>=
 plot(specsdm91, pch = 16, ylim = c(0,2500))
 plot(usl.model, add = TRUE)
 cache.scale <- scalability(usl.model, kappa = 0.00005)
@@ -464,23 +459,18 @@ order function returning a function and not just a single value. That makes
 it possible to use the \kbd{curve()} function to plot the values over the
 specific range.
 
-\autoref{fig:spplot1} shows the measured throughput in scripts per hour for a
+\Cref{fig:spplot2} shows the measured throughput in scripts per hour for a
 given load, i.e., the number of simulated users. The solid line indicates the
-derived USL model while the dashed line resembles our hypothetical system using
-the proposed optimization.
+derived USL model while the dashed line resembles our hypothetical system
+using the proposed optimization.
 
-\begin{figure}[hbt]
-\centering
-<<fig=TRUE, echo=FALSE>>=
+<<'spplot2', echo=FALSE, fig.cap='The result of the SPEC SDM91 benchmark for a SPARCcenter 2000 (dots) together with the calculated scalability function (solid line) and a hypothetical scalability function (dashed line)'>>=
 <<spplot1>>
 @
-\caption{The result of the SPEC SDM91 benchmark for a SPARCcenter 2000 (dots) together with the calculated scalability function (solid line) and a hypothetical scalability function (dashed line)}
-\label{fig:spplot1}
-\end{figure}
 
 From the figure we can see that the scalability really peaks at one point.
-Increasing the load beyond that point leads to retrograde behavior, i.e.,
-the throughput decreases again. As we have calculated earlier, the measured
+Increasing the load beyond that point leads to retrograde behavior, i.e., the
+throughput decreases again. As we have calculated earlier, the measured
 system will reach this point sooner than the hypothetical system.
 
 We can combine the \kbd{scalability()} and the \kbd{peak.scalability()}
@@ -515,28 +505,25 @@ fit <- predict(usl.model, newdata = load, interval = "confidence", level = 0.95)
 @
 
 The matrix is used to define the coordinates of a polygon containing the area
-between the lower and the upper bounds. The polygon connects the points of the
-lower bounds from lower to higher values and then back using the points of the
-upper bounds.
+between the lower and the upper bounds. The polygon connects the points of
+the lower bounds from lower to higher values and then back using the points
+of the upper bounds.
 
 <<>>=
-usl.polygon <- matrix(c(load[, 1], rev(load[, 1]),
-                        fit[, 'lwr'], rev(fit[, 'upr'])),
-                 nrow = 2 * nrow(load))
+usl.polygon <- matrix(c(load[, 1], rev(load[, 1]), fit[, 'lwr'], rev(fit[, 'upr'])),
+                       nrow = 2 * nrow(load))
 @
 
-The plot is composed from multiple single plots. The first plot initializes the
-canvas and creates the axis. Then the polygon is plotted using a gray area. In
-the next step the measured values are added as points. Finally a solid line is
-plotted to indicate the fitted scalability function.
+The plot is composed from multiple single plots. The first plot initializes
+the canvas and creates the axis. Then the polygon is plotted using a gray
+area. In the next step the measured values are added as points. Finally a
+solid line is plotted to indicate the fitted scalability function. See
+\cref{fig:ciplot1} for the entire plot.
 
-<<ciplot1>>=
+<<'ciplot1', fig.cap='The result of the SPEC SDM91 benchmark with confidence bands for the scalability function at the 95\\% level'>>=
 # Create empty plot (define canvas size, axis, ...)
-plot(specsdm91,
-     ylim = c(0, 2000), 
-     xlab = names(specsdm91)[1],
-     ylab = names(specsdm91)[2], 
-     type = "n")
+plot(specsdm91, xlab = names(specsdm91)[1], ylab = names(specsdm91)[2],
+      ylim = c(0, 2000), type = "n")
 
 # Plot gray polygon indicating the confidence interval
 polygon(usl.polygon, border = NA, col = "gray")
@@ -548,36 +535,25 @@ points(specsdm91, pch = 16)
 lines(load[, 1], fit[, 'fit'])
 @
 
-See \autoref{fig:ciplot1} for the entire plot.
-
-\begin{figure}[hbt]
-\centering
-<<fig=TRUE, echo=FALSE>>=
-<<ciplot1>>
-@
-\caption{The result of the SPEC SDM91 benchmark with confidence bands for the scalability function at the 95\% level}
-\label{fig:ciplot1}
-\end{figure}
-
-Another way to illustrate the impact of the parameters $\sigma$ and $\kappa$ on
-the scalability is by looking at the achievable speedup when a fixed load is
-parallelized. A naive estimation would be that doubling the degree of 
+Another way to illustrate the impact of the parameters $\sigma$ and $\kappa$
+on the scalability is by looking at the achievable speedup when a fixed load
+is parallelized. A naive estimation would be that doubling the degree of
 parallelization should cut the execution time in halve.
 
 Unfortunately it doesn't work this way. In general there is a range where
-doubling the parallelization will actually improve the execution time. But the
-improvement will get smaller and smaller when the degree of parallelism is
-increased further. This is also an effect of \emph{diminishing returns} as
-already seen in \autoref{dimret}. The real execution time is in fact the sum
-of the ideal execution time and the overhead for dealing with contention and
+doubling the parallelization will actually improve the execution time. But
+the improvement will get smaller and smaller when the degree of parallelism
+is increased further. This is also an effect of \emph{diminishing returns} as
+already seen in \cref{dimret}. The real execution time is in fact the sum of
+the ideal execution time and the overhead for dealing with contention and
 coherency delays.
 
 Dr.~Gunther shows in \cite{DBLP:journals/corr/abs-0808-1431} how the total
-execution time of a parallelized workload depends on the degree of parallelism
-$p$ and the coefficients $\sigma$ and $\kappa$ of the associated USL model.
-Equation 26 in his paper identifies the magnitude of the three components
---- given as fractions of the serial execution time $T_1$ --- that account for
-the total execution time of the parallelized workload.
+execution time of a parallelized workload depends on the degree of
+parallelism $p$ and the coefficients $\sigma$ and $\kappa$ of the associated
+USL model. Equation 26 in his paper identifies the magnitude of the three
+components --- given as fractions of the serial execution time $T_1$ --- that
+account for the total execution time of the parallelized workload.
 
 \begin{align}
 T_{ideal}      &= \frac{1}{p} T_1\label{eqn:ideal}\\
@@ -606,13 +582,13 @@ We can see that the ideal execution time for running $10$ jobs in parallel is
 $\nicefrac{1}{10}$ of the execution time of running the jobs unparallelized.
 To get the total fraction we have to add the overhead for contention
 ($\Sexpr{100*signif(ovhd[1,'contention'], 2)}\%$) and for coherency delays
-($\Sexpr{100*signif(ovhd[1,'coherency'], 2)}\%$). 
-This gives a total of $\Sexpr{100*signif(sum(ovhd[1,]), 4)}\%$. So with $10$
-jobs in parallel we are only about $\Sexpr{signif(1/sum(ovhd[1,]), 2)}$ times
-faster than running the same workload in a serial way.
+($\Sexpr{100*signif(ovhd[1,'coherency'], 2)}\%$). This gives a total of
+$\Sexpr{100*signif(sum(ovhd[1,]), 4)}\%$. So with $10$ jobs in parallel we
+are only about $\Sexpr{signif(1/sum(ovhd[1,]), 2)}$ times faster than running
+the same workload in a serial way.
 
-\autoref{eqn:contention} shows that the percentage of time spent on dealing
-with contention will converge to the value of $\sigma$. \autoref{eqn:coherency}
+\Cref{eqn:contention} shows that the percentage of time spent on dealing with
+contention will converge to the value of $\sigma$. \Cref{eqn:coherency}
 explains that coherency delays will grow beyond any limit if the degree of
 parallelism is large enough. This corresponds to the observation that adding
 more parallelism will sometimes make performance worse.
@@ -621,22 +597,12 @@ A stacked barplot can be used to visualize how the different effects change
 with an increasing degree of parallelism. Note that the result matrix must be
 transposed to match the format needed for for the \kbd{barplot()} command.
 
-<<ovplot1>>=
-barplot(height = t(ovhd), names.arg = load[, 1],
-        xlab = names(load), legend.text = TRUE)
+<<'ovplot1', fig.cap='Decomposition of the execution time for parallelized workloads of the SPECSDM91 benchmark. The time is measured as a fraction of the time needed for serial execution of the workload.'>>=
+barplot(height = t(ovhd), names.arg = load[, 1], xlab = names(load), legend.text = TRUE)
 @
 
-\begin{figure}[hbt]
-\centering
-<<fig=TRUE, echo=FALSE>>=
-<<ovplot1>>
-@
-\caption{Components of the execution time for parallelized workloads of the SPECSDM91 benchmark. The time is measured as a fraction of the time needed for serial execution of the workload.}
-\label{fig:ovplot1}
-\end{figure}
-
-\autoref{fig:ovplot1} shows the resulting plot. It clearly shows the decrease
-in ideal execution time when the degree of parallelism is increased. It also
+\Cref{fig:ovplot1} shows the resulting plot. It clearly shows the decrease in
+ideal execution time when the degree of parallelism is increased. It also
 shows how initially almost only contention contributes to the total execution
 time. For higher degrees of parallelism the impact of coherency delays grows.
 Note how the difference in ideal execution time between $100$ and $200$
@@ -644,10 +610,173 @@ parallel jobs effectively has no effect on the total execution time.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\subsection{Case Study: Multivalued Data}
+\subsection{Case Study: Multivalued Data}
 
-%TODO
+It is very common to use multivalued data for a scalability analysis. These
+measurements are often taken from a live system and may include many
+different data points for similar load values. This could be the result of a
+non-homogeneous workload and an analyst has to decide how to take that into
+account. But for a production system there is usually no feasible way to
+create a homogeneous workload.
 
+The following data shows a subset of performance data gathered from an Oracle
+database system providing a login service for multiple web applications. For
+the analysis we focus on only two of the available metrics:
+
+\begin{labeling}{\texttt{txn\_rate}:}
+\item[\texttt{txn\_rate}:] The average number of processed database
+  transactions. This metric is given as transactions per second.
+\item[\texttt{db\_time}:] The average time spent inside the database either
+  working on a CPU or waiting for resources (I/O, locks, buffers \dots). The
+  time is expressed as seconds per second, so two sessions working for
+  exactly one quarter of a second each will contribute a total of half a
+  second for that second. Oracle has coined the term \emph{Average Active
+  Sessions} (AAS) for this metric.
+\end{labeling}
+
+Let's have a look at the first couple of data points in our data set. For
+each time interval of two minutes there is a corresponding value for the
+average database time per seconds and for the average number of transactions
+per second in this interval.
+
+<<>>=
+data(oracledb)
+head(subset(oracledb, select = c(timestamp, db_time, txn_rate)))
+@
+
+A naive approch would be a plot of the data as a time series (see
+\cref{fig:oraplot1}). This plot shows the familiar pattern of an OLTP
+application that is mostly used during office hours. Unfortunately this type
+of plot is pretty much useless when performing a scalability analysis.
+
+<<'oraplot1', echo=FALSE, fig.cap='Transaction rates of an Oracle database system during the day of January 19th, 2012'>>=
+plot(txn_rate ~ timestamp, oracledb, pch = 20, xlab = "Time of day", ylab = "Txn / sec")
+@
+
+The Universal Scalability Law correlates a throughput with a load. In this
+case the throughput is clearly given by the transaction rate and the database
+time is a taken as the load metric. The definition above states that the
+total time spent --- either running on a CPU or waiting --- is a measurement
+for the average number of active sessions. So we use that to express the load
+on the database system.
+
+As usual, we call the \kbd{usl()} function to carry out the analysis. See
+\cref{fig:orausl1} for the scatterplot of the data including the plot of the
+estimated scalability function.
+
+<<'orausl1', fig.cap='Relationship between the transaction rate and the number of average active sessions in an Oracle database system'>>=
+usl.oracle <- usl(txn_rate ~ db_time, oracledb, method = "nlxb")
+
+plot(txn_rate ~ db_time, oracledb, xlab = "Average active sessions", ylab = "Txn / sec")
+plot(usl.oracle, add = TRUE)
+@
+
+We use the \texttt{nlxb} method here because the data does not include a
+value for exactly one average active session. Current versions of the \usl{}
+package will automatically switch to the \texttt{nlxb} method if the data
+does not provide the required measurements for the \texttt{default} method.
+So normally you may omit this option.
+
+Now we can retrieve the coefficients for this model.
+
+<<>>=
+coef(usl.oracle)
+@
+
+Our $\sigma$ here is about an order of magnitude bigger than what we have
+seen in the previous sections. This indicates a major issue with some kind of
+serialization or queueing that severely limits the scalability. In fact it is
+so bad that the impact is already visible with only a few active sessions
+working at the same time: according to the model the peak throughput is
+reached at about $\Sexpr{signif(peak.scalability(usl.oracle), 2)}$ sessions.
+
+<<>>=
+peak.scalability(usl.oracle)
+@
+
+The confidence interval for $\sigma$ confirms that there is only a small
+uncertainty about the magnitude of the calculated coefficients.
+
+<<>>=
+confint(usl.oracle)
+@
+
+This analysis shows how we can use some of the metrics provided by a live
+Oracle database system to learn about the scalability. Note that neither the
+Oracle software nor the application needed any additional instrumentation to
+collect this data. Also the analysis was done without any internal knowledge
+about the way the application was using the database.
+
+% Looking at the plot of the scalability function in \cref{fig:orausl1}, we
+% could argue that the estimated function seems to be too pessimistic. There
+% are many data points showing a much higher transaction rate than the
+% scalability function suggests. Numerically this is caused by using the
+% \emph{least squares} method which considers all data points equally.
+
+% Let's estimate the scalability when only the alleged \emph{good} data
+% points are taken into account. Here is a constructive description to
+% isolate the points that make up the upper boundary of the comprising area.
+
+% \begin{enumerate}
+% \item Determine the convex hull of the data points
+% \item Locate the data points with the smallest and the largest abscissa
+% \item Find the straight line passing through these two points
+% \item Use only the data points on the convex hull that are located on or above
+%   this line
+% \end{enumerate}
+
+% <<'orausl2', echo=FALSE, fig.cap='Using the convex hull to set the boundary between upper and lower data points'>>=
+% p <- with(oracledb, data.frame(db_time, txn_rate))
+
+% # Plot all points
+% plot(txn_rate ~ db_time, p,
+%      xlab = "Average active sessions", ylab = "Transactions per second")
+
+% # Calculate convex hull
+% idx <- chull(cbind(p$db_time, p$txn_rate))
+% pts <- p[idx, ]
+
+% # Get point with smallest abscissa
+% p1 <- which.min(pts$db_time)
+% x1 <- pts[p1, 1]
+% y1 <- pts[p1, 2]
+
+% # Get point with largest abscissa
+% p2 <- which.max(pts$db_time)
+% x2 <- pts[p2, 1]
+% y2 <- pts[p2, 2]
+
+% # Slope–intercept equation: y=mx+b
+% m <- (y2 - y1) / (x2 - x1)
+% b <- (-x1 * m) + y1
+
+% # Plot points on convex hull
+% points(pts, pch = 16)
+
+% # Remove points below the line and sort ascending by db_time
+% top <- subset(pts, txn_rate >= (m * db_time) + b)
+% top <- top[order(top$db_time), ]
+
+% lines(top$db_time, top$txn_rate, lty = 1)
+
+% abline(b, m, lty = 2)
+% @
+
+% \Cref{fig:orausl2} uses solid black points to mark the points of the convex
+% hull. The dashed line, defined by the coordinates
+% $\left(\Sexpr{signif(x1,2)},\Sexpr{signif(y1,2)}\right)$ and
+% $\left(\Sexpr{signif(x2,2)},\Sexpr{signif(y2,2)}\right)$, is the boundary
+% between the lower and the upper part.
+
+% We will now use only the data points on the upper part of the convex hull
+% for an additional analysis.
+
+% <<>>=
+% usl.oracle2 <- usl(txn_rate ~ db_time, top, method = "nlxb")
+
+% coef(usl.oracle2)
+% confint(usl.oracle2)
+% @
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \bibliographystyle{alpha}
