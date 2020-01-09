@@ -1,0 +1,40 @@
+
+R version 3.6.2 (2019-12-12) -- "Dark and Stormy Night"
+Copyright (C) 2019 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> # coef.R --- Test function coef
+> 
+> library(usl)
+> 
+> dfr <- data.frame(load=c(1, 2,      4,      6,      8,      10), 
++                   tput=c(1, 1.8868, 3.0769, 3.5294, 3.5398, 3.3557))
+> 
+> u <- usl(tput ~ load, dfr)
+> 
+> signif(coef(u)[['alpha']], 3)
+[1] 0.02
+> signif(coef(u)[['beta']], 3)
+[1] 0.02
+> 
+> options(digits=3)
+> 
+> coef(u)
+alpha  beta gamma 
+ 0.02  0.02  1.00 
+> 
+> proc.time()
+   user  system elapsed 
+  0.440   0.111   0.579 

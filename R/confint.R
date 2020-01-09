@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2016 Stefan Moeding
+# Copyright (c) 2013-2020 Stefan Moeding
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 #' Estimate confidence intervals for one or more parameters in a USL model.
 #' The intervals are calculated from the parameter standard error using the
 #' Student t distribution at the given level.
-#' 
+#'
 #' Bootstrapping is no longer used to estimate confidence intervals.
 #'
 #' @param object A USL object.
@@ -62,7 +62,7 @@ setMethod(
   signature = "USL",
   definition = function(object, parm, level = 0.95) {
     ci.value <- NULL # vector with confidence interval values
-    
+
     # Degree of freedom for Student t distribution
     df <- length(object@residuals) - 1L
 
@@ -77,8 +77,9 @@ setMethod(
     if (mode(parm) == "numeric") {
       parm <- as.character(parm)
 
-      parm <- gsub("1", "sigma", parm, ignore.case = TRUE)
-      parm <- gsub("2", "kappa", parm, ignore.case = TRUE)
+      parm <- gsub("1", "alpha", parm, ignore.case = TRUE)
+      parm <- gsub("2", "beta", parm, ignore.case = TRUE)
+      parm <- gsub("3", "gamma", parm, ignore.case = TRUE)
     }
 
     # Calculate confidence intervals for the given level

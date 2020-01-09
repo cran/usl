@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2017 Stefan Moeding
+# Copyright (c) 2013-2020 Stefan Moeding
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,57 +24,6 @@
 
 
 ##############################################################################
-#' Solve a USL model using a transformation to a 2nd degree polynom
-#'
-#' This function solves a USL model using the transformation introduced in
-#' sections 5.5.1 - 5.5.3 of \emph{Guerrilla Capacity Planning}.
-#'
-#' @param model A data frame with two columns containing the values of the
-#'   predictor variable in the first column and the values of the response
-#'   variable in the second column.
-#'
-#' @return A list containing three elements: the scale.factor of the model,
-#'   the model coefficients sigma and kappa.
-#'
-#' @seealso \code{\link{usl}}
-#'
-#' @references Neil J. Gunther. Guerrilla Capacity Planning: A Tactical
-#'   Approach to Planning for Highly Scalable Applications and Services.
-#'   Springer, Heidelberg, Germany, 1st edition, 2007.
-#'
-#' @keywords internal
-#'
-usl.solve.lm <- function(model) {
-  # Verify that the scale factor for normalization is in the dataframe
-  if (all(model[ , 1] != 1)) {
-    stop(paste0("'data' must contain a row where '", names(model[1]), "' = 1"))
-  }
-
-  # Calculate scale factor: get throughput for entry where load=1
-  scale.factor <- model[match(1, model[ , 1]), 2]
-
-  # Rename columns
-  names(model) <- c("load", "throughput")
-
-  # normalize data (cf. GCaP chapter 5.4)
-  model$capacity <- model$throughput / scale.factor
-
-  # compute deviations from linearity (cf. GCaP chapter 5.5.2)
-  model$x <- model$load - 1
-  model$y <- (model$load / model$capacity) - 1
-
-  # Solve quadratic model without intercept
-  model.fit <- lm(y ~ I(x^2) + x - 1, data = model)
-
-  # Calculate coefficients sigma & kappa used by the USL model
-  sigma <- coef(model.fit)[[2]] - coef(model.fit)[[1]]
-  kappa <- coef(model.fit)[[1]]
-
-  return(list(scale.factor = scale.factor, sigma = sigma, kappa = kappa))
-}
-
-
-##############################################################################
 #' Solve a USL model using non linear regression
 #'
 #' This function solves a USL model using non linear regression with least
@@ -86,8 +35,8 @@ usl.solve.lm <- function(model) {
 #'   predictor variable in the first column and the values of the response
 #'   variable in the second column.
 #'
-#' @return A list containing three elements: the scale.factor of the model,
-#'   the model coefficients sigma and kappa.
+#' @return A list containing three elements: the model coefficients alpha,
+#'   beta and gamma.
 #'
 #' @seealso \code{\link{usl}}
 #' @keywords internal
@@ -95,21 +44,20 @@ usl.solve.lm <- function(model) {
 usl.solve.nls <- function(model) {
   names(model) <- c("x", "y")
 
-  # Lower bound for scale.factor?
-  sf.max <- max(model$y / model$x)
+  gamma.start <- max(model$y / model$x)
 
-  model.fit <- nls(y ~ X1 * x/(1 + sigma * (x-1) + kappa * x * (x-1)),
+  model.fit <- nls(y ~ (gamma * x)/(1 + alpha * (x-1) + beta * x * (x-1)),
                    data = model,
-                   start = c(X1 = sf.max, sigma = 0.1, kappa = 0.01),
+                   start = c(gamma = gamma.start, alpha = 0.01, beta = 0.0001),
                    algorithm = "port",
-                   lower = c(X1 = 0, sigma = 0, kappa = 0),
-                   upper = c(X1 = Inf, sigma = 1, kappa = 1))
+                   lower = c(gamma = 0, alpha = 0, beta = 0),
+                   upper = c(gamma = Inf, alpha = 1, beta = 1))
 
-  scale.factor = coef(model.fit)[['X1']]
-  sigma = coef(model.fit)[['sigma']]
-  kappa = coef(model.fit)[['kappa']]
+  alpha = coef(model.fit)[['alpha']]
+  beta  = coef(model.fit)[['beta']]
+  gamma = coef(model.fit)[['gamma']]
 
-  return(list(scale.factor = scale.factor, sigma = sigma, kappa = kappa))
+  return(list(alpha = alpha, beta = beta, gamma = gamma))
 }
 
 
@@ -124,8 +72,8 @@ usl.solve.nls <- function(model) {
 #'   predictor variable in the first column and the values of the response
 #'   variable in the second column.
 #'
-#' @return A list containing three elements: the scale.factor of the model,
-#'   the model coefficients sigma and kappa.
+#' @return A list containing three elements: the model coefficients alpha,
+#'   beta and gamma.
 #'
 #' @seealso \code{\link{usl}}
 #'
@@ -139,22 +87,21 @@ usl.solve.nls <- function(model) {
 usl.solve.nlxb <- function(model) {
   names(model) <- c("x", "y")
 
-  # Lower bound for scale.factor?
-  sf.max <- max(model$y / model$x)
+  gamma.start <- max(model$y / model$x)
 
   log <- capture.output({
-    model.fit <- nlxb(y ~ X1 * x/(1 + sigma * (x-1) + kappa * x * (x-1)),
+    model.fit <- nlxb(y ~ (gamma * x)/(1 + alpha * (x-1) + beta * x * (x-1)),
                       data = model,
-                      start = c(X1 = sf.max, sigma = 0.1, kappa = 0.01),
-                      lower = c(X1 = 0, sigma = 0, kappa = 0),
-                      upper = c(X1 = Inf, sigma = 1, kappa = 1))
+                      start = c(gamma = gamma.start, alpha = 0.01, beta = 0.0001),
+                      lower = c(gamma = 0, alpha = 0, beta = 0),
+                      upper = c(gamma = Inf, alpha = 1, beta = 1))
   })
-  
-  scale.factor = model.fit$coefficients[['X1']]
-  sigma = model.fit$coefficients[['sigma']]
-  kappa = model.fit$coefficients[['kappa']]
 
-  return(list(scale.factor = scale.factor, sigma = sigma, kappa = kappa))
+  alpha = model.fit$coefficients[['alpha']]
+  beta  = model.fit$coefficients[['beta']]
+  gamma = model.fit$coefficients[['gamma']]
+
+  return(list(alpha = alpha, beta = beta, gamma = gamma))
 }
 
 
@@ -171,40 +118,41 @@ usl.solve.nlxb <- function(model) {
 #' Therefore the model formula must be in the simple
 #' "\code{response ~ predictor}" format.
 #'
-#' The model produces two coefficients as result: \code{sigma} models the
-#' contention and \code{kappa} the coherency delay of the system. The
-#' function \code{\link{coef}} extracts the coefficients from the model
+#' The model produces two main coefficients as result: \code{alpha} models the
+#' contention and \code{beta} the coherency delay of the system. The third
+#' coefficient \code{gamma} estimates the value of the dependent variable
+#' (e.g. throughput) for the single user/process/thread case. It therefore
+#' corresponds to the scale factor calculated in previous versions of the
+#' \code{usl} package.
+#'
+#' The function \code{\link{coef}} extracts the coefficients from the model
 #' object.
 #'
 #' The argument \code{method} selects which solver is used to solve the
 #' model:
 #'
 #' \itemize{
-#'   \item "\code{default}" for the default method using a transformation
-#'     into a 2nd degree polynom. It can only be used if the model frame
-#'     contains a value for the normalization where the predictor equals
-#'     "\code{1}" for one measurement. This is the algorithm introduced by
-#'     Dr. Neil J. Gunther in the book \emph{Guerrilla Capacity Planning}.
 #'   \item "\code{nls}" for a nonlinear regression model. This method
-#'     estimates not only the coefficients \code{sigma} and \code{kappa} but
-#'     also the \code{scale.factor} for the normalization. \code{\link{nls}}
-#'     with the "\code{port}" algorithm is used internally to solve the
-#'     model. So all restrictions of the "\code{port}" algorithm apply.
+#'     estimates all coefficients \code{alpha}, \code{beta} and \code{gamma}.
+#'     The R base function \code{\link{nls}} with the "\code{port}" algorithm
+#'     is used internally to solve the model. So all restrictions of the
+#'     "\code{port}" algorithm apply.
 #'   \item "\code{nlxb}" for a nonliner regression model using the function
 #'     \code{\link{nlxb}} from the \code{\link{nlsr}} package. This method
-#'     also estimates both coefficients and the normalization factor. It is
-#'     expected to be more robust than the \code{nls} method.
+#'     also estimates all three coefficients. It is expected to be more robust
+#'     than the \code{nls} method.
+#'   \item "\code{default}" for the default method using a transformation
+#'     into a 2nd degree polynom has been removed with the implementation
+#'     of the model using three coefficients in the \pkg{usl} package 2.0.0.
+#'     Calling the "\code{default}" method will internally dispatch to the
+#'     "\code{nlxb}" solver instead.
 #' }
-#'
-#' The "\code{nlxb}" solver is used as fallback if the "\code{default}"
-#' method is selected and a predictor equal "\code{1}" is missing. A warning
-#' message will be printed in this case.
 #'
 #' The Universal Scalability Law can be expressed with following formula.
 #' \code{C(N)} predicts the relative capacity of the system for a given
 #' load \code{N}:
 #'
-#' \deqn{C(N) = \frac{N}{1 + \sigma (N - 1) + \kappa N (N - 1)}}{C(N) = N / (1 + \sigma * (N - 1) + \kappa * N * (N - 1))}
+#' \deqn{C(N) = \frac{\gamma N}{1 + \alpha (N - 1) + \beta N (N - 1)}}{C(N) = N / (1 + \alpha * (N - 1) + \beta * N * (N - 1))}
 #'
 #' @param formula An object of class "\code{\link{formula}}" (or one that
 #'   can be coerced to that class): a symbolic description of the model to be
@@ -308,23 +256,17 @@ usl <- function(formula, data, method = "default") {
   model.input <- data.frame(frame[regr], frame[resp])
 
   # Choose solver function
-  sel <- switch(method, nls=2, nlxb=3, 1)
-  usl.solve <- switch(sel, usl.solve.lm, usl.solve.nls, usl.solve.nlxb)
-  
-  # Use method 'nlxb' as fallback if scale factor is missing in data
-  if ((sel == 1)  && (all(frame[regr] != 1))) {
-    usl.solve <- usl.solve.nlxb
-    warning(paste0("'data' has no row where '", regr, "' = 1; ",
-                   "switching method from 'default' to 'nlxb'"))
-  }
+  sel <- switch(method, nls=2, 1)
+  usl.solve <- switch(sel, usl.solve.nlxb, usl.solve.nls)
 
   # Solve the model for the model frame
   model.result <- usl.solve(model.input)
 
   # Create object for class USL
   .Object <- new(Class = "USL", call, frame, regr, resp,
-                 model.result[['scale.factor']],
-                 model.result[['sigma']], model.result[['kappa']])
+                 model.result[['alpha']],
+                 model.result[['beta']],
+                 model.result[['gamma']])
 
   # Finish building the USL object
   nam <- row.names(frame)

@@ -1,4 +1,4 @@
-# Copyright (c) 2013, 2014 Stefan Moeding
+# Copyright (c) 2013-2020 Stefan Moeding
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -57,9 +57,6 @@ setMethod(
     cat("\nCall:\n",
         paste(deparse(x@call), sep = "\n", collapse = "\n"), "\n", sep = "")
 
-    cat("\nScale Factor for normalization:",
-        formatC(x@scale.factor, digits = digits, width = 1), "\n")
-
     cat("\nEfficiency:\n")
     zz <- zapsmall(quantile(x@efficiency), digits + 1)
     print(structure(zz, names = qnames), digits = digits, ...)
@@ -76,7 +73,7 @@ setMethod(
     rows <- attributes(x@coefficients)$names
     cols <- c("Estimate", "Std. Error", "t value", "Pr(>|t|)")
 
-    para.mat <- matrix(para, nrow = 2, dimnames = list(rows, cols))
+    para.mat <- matrix(para, nrow = length(x@coef.names), dimnames = list(rows, cols))
 
     printCoefmat(para.mat, digits = digits, print.gap = 2)
 

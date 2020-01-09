@@ -1,3 +1,21 @@
+CHANGES in `usl' VERSION 2.0.0 (2020-01-08)
+
+* Version 2.0.0 is a major update that includes some breaking changes. The
+  Universal Scalability Law has evolved from the originial two coefficient
+  formula into a three coefficient formula to obviate the need for parameter
+  normalization. The following changes are made to align the package with
+  the current use:
+  - The previously used coefficients `sigma` and `kappa` are renamed to
+    `alpha` and `beta`.
+  - A new coefficient `gamma` is introduced. This coefficient corresponds
+    to the scale factor calculated in earlier versions when parameter
+    normalization was used.
+  - The `default` method of the `usl()` function is no longer a separate
+    solver method as normalization has been removed. Calling the function
+    with either no or the `default` value for the `method` parameter will
+    internally use the `nlxb` implementation.
+
+
 CHANGES in `usl' VERSION 1.8.0 (2017-08-07)
 
 * The `nlsr` package will replace the older `nlmrt` package. The package has
@@ -22,7 +40,7 @@ CHANGES in `usl' VERSION 1.5.0 (2016-02-25)
 * Use method `nlxb' as fallback if the value for the scale factor is missing
   in the data and the `default' method is used. A warning message is printed
   in this case. This is more user-friendly than the error message given
-  before. 
+  before.
 
 * Remove unused parameter `R' from the signature of the `usl()' function.
 
@@ -52,7 +70,7 @@ CHANGES in `usl' VERSION 1.3.0 (2014-06-02)
   Bootstrapping is no longer used for the calculation. Therefore the argument
   `R' for the `usl()' function and the argument `type' for the `confint()'
   function have been deprecated. The arguments will be removed in the next
-  release. 
+  release.
 
 * Added coefficient standard errors and residual standard error to the summary
   output.

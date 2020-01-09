@@ -1,6 +1,6 @@
 
-R version 3.4.1 (2017-06-30) -- "Single Candle"
-Copyright (C) 2017 The R Foundation for Statistical Computing
+R version 3.6.2 (2019-12-12) -- "Dark and Stormy Night"
+Copyright (C) 2019 The R Foundation for Statistical Computing
 Platform: x86_64-apple-darwin15.6.0 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -15,9 +15,7 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 'help.start()' for an HTML browser interface to help.
 Type 'q()' to quit R.
 
-> #
-> # Test function confint
-> #
+> # confint.R --- Test function confint
 > 
 > library(usl)
 > 
@@ -30,24 +28,37 @@ Type 'q()' to quit R.
 > u <- usl(throughput ~ processors, data = raytracer)
 > 
 > coef(u)
-     sigma      kappa 
-0.05002394 0.00000471 
+  alpha    beta   gamma 
+ 0.0578  0.0000 21.8488 
+> 
+> confint(u)
+          2.5 %    97.5 %
+alpha  0.033677  0.081864
+beta  -0.000214  0.000214
+gamma 17.868380 25.829306
 > 
 > confint(u, parm=1)
        2.5 % 97.5 %
-sigma 0.0442 0.0558
-> confint(u, parm="sigma")
+alpha 0.0337 0.0819
+> confint(u, parm="alpha")
        2.5 % 97.5 %
-sigma 0.0442 0.0558
+alpha 0.0337 0.0819
 > 
 > confint(u, parm=2)
-          2.5 %  97.5 %
-kappa -0.000121 0.00013
-> confint(u, parm="kappa")
-          2.5 %  97.5 %
-kappa -0.000121 0.00013
+         2.5 %   97.5 %
+beta -0.000214 0.000214
+> confint(u, parm="beta")
+         2.5 %   97.5 %
+beta -0.000214 0.000214
 > 
 > confint(u, parm=3)
+      2.5 % 97.5 %
+gamma  17.9   25.8
+> confint(u, parm="gamma")
+      2.5 % 97.5 %
+gamma  17.9   25.8
+> 
+> confint(u, parm=4)
      2.5 % 97.5 %
 <NA>    NA     NA
 > confint(u, parm="none")
@@ -56,4 +67,4 @@ kappa -0.000121 0.00013
 > 
 > proc.time()
    user  system elapsed 
-  0.512   0.071   0.566 
+  0.535   0.115   0.634 

@@ -1,4 +1,4 @@
-# Copyright (c) 2013, 2014 Stefan Moeding
+# Copyright (c) 2013-2020 Stefan Moeding
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,8 @@
 #' @slot call The call used to create the model.
 #' @slot regr The name of the regressor variable.
 #' @slot resp The name of the response variable.
-#' @slot scale.factor The scale factor used to create the model.
-#' @slot coefficients The coefficients sigma and kappa of the model.
-#' @slot coef.std.err The standard errors for the coefficients sigma and kappa.
+#' @slot coefficients The coefficients alpha, beta and gamma of the model.
+#' @slot coef.std.err The standard errors for the coefficients alpha and beta.
 #' @slot coef.names A vector with the names of the coefficients.
 #' @slot fitted The fitted values of the model. This is a vector.
 #' @slot residuals The residuals of the model. This is a vector.
@@ -54,7 +53,6 @@ setClass("USL",
                         call          = "call",
                         regr          = "character",
                         resp          = "character",
-                        scale.factor  = "numeric",
                         coefficients  = "vector",
                         coef.std.err  = "vector",
                         coef.names    = "vector",
@@ -65,7 +63,7 @@ setClass("USL",
                         adj.r.squared = "numeric",
                         efficiency    = "vector",
                         na.action     = "character"),
-         prototype(coef.names    = c("sigma", "kappa"),
+         prototype(coef.names    = c("alpha", "beta", "gamma"),
                    df.residual   = 0L,
                    r.squared     = 0,
                    adj.r.squared = 0,
@@ -83,21 +81,6 @@ setClass("USL",
              err <- c(err, msg)
            }
 
-           if (object@scale.factor <= 0) {
-             msg <- "scale factor must be > 0"
-             err <- c(err, msg)
-           }
-
-           if (any(object@coefficients < 0)) {
-             msg <- "all coefficients must be >= 0"
-             err <- c(err, msg)
-           }
-
-           if (any(object@coefficients > 1)) {
-             msg <- "all coefficients must be <= 1"
-             err <- c(err, msg)
-           }
-
            if ((object@r.squared < 0) || (object@r.squared > 1)) {
              msg <- "r.squared must be 0 <= r.squared <= 1"
              err <- c(err, msg)
@@ -106,29 +89,6 @@ setClass("USL",
            if ((object@adj.r.squared < 0) || (object@adj.r.squared > 1)) {
              msg <- "adj.r.squared must be 0 <= adj.r.squared <= 1"
              err <- c(err, msg)
-           }
-
-           #
-           # Check validity of values according to Corollary 5.1, p. 81, GCaP
-           #
-           sigma <- object@coefficients[['sigma']]
-           kappa <- object@coefficients[['kappa']]
-
-           if (kappa > sigma + kappa) {
-             msg <- "illegal coefficients: kappa > sigma + kappa"
-             err <- c(err, msg)
-           }
-
-           if (sigma + kappa >= kappa + 1) {
-             msg <- "illegal coefficients: sigma + kappa >= kappa + 1"
-             err <- c(err, msg)
-           }
-
-           if (any(object@efficiency > 1)) {
-             # Capacity grows more than load: can this really be?
-             warning("'data' shows efficiency > 1; ",
-                     "this looks almost too good to be true",
-                     call. = FALSE)
            }
 
            if (length(err) == 0) return(TRUE) else return(err)

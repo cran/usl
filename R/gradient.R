@@ -1,4 +1,4 @@
-# Copyright (c) 2014 Stefan Moeding
+# Copyright (c) 2014-2020 Stefan Moeding
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@
 #' output of the \code{\link{deriv}} function.
 #'
 #' @param x The USL object.
-#' 
+#'
 #' @return The gradient matrix.
 #'
 #' @seealso \code{\link{usl}}
@@ -38,25 +38,26 @@
 #' @keywords internal
 #'
 gradient.usl <- function(x) {
-  sigma = x@coefficients['sigma']
-  kappa = x@coefficients['kappa']
-  scale.factor = x@scale.factor
+  alpha = x@coefficients['alpha']
+  beta  = x@coefficients['beta']
+  gamma = x@coefficients['gamma']
   n = x@frame[, x@regr, drop = TRUE]
-  
+
   # Based on the output of:
-  # deriv(~ X0 * n / (1 + (sigma * (n-1)) + (kappa * n * (n-1))), # rhs
-  #       c('sigma', 'kappa'),                                    # params
-  #       function(sigma, kappa, n, X0){}                         # args
-  
-  term1 <- n - 1
-  term2 <- 1 + (sigma * term1) + (kappa * n * term1)
-  term3 <- n * term1
-  term4 <- term2 ^ 2
-  
-  grad.sigma <- -(scale.factor * term3 / term4)
-  grad.kappa <- -(scale.factor * (n * term3) / term4)
-  
-  matrix(c(grad.sigma, grad.kappa),
-         nrow = length(n), 
+  # deriv(~ (gamma * n) / (1 + (alpha * (n-1)) + (beta * n * (n-1))), # rhs
+  #       c('alpha', 'beta', 'gamma'),                                # params
+  #       function(alpha, beta, gamma, n){})                          # args
+
+  expr1 <- gamma * n
+  expr2 <- n - 1
+  expr3 <- 1 + (alpha * expr2) + (beta * n * expr2)
+  expr4 <- expr3 ^ 2
+
+  grad.alpha <- -(expr1 * expr2 / expr4)
+  grad.beta  <- -(expr1 * (n * expr2) / expr4)
+  grad.gamma <- n / expr3
+
+  matrix(c(grad.alpha, grad.beta, grad.gamma),
+         nrow = length(n),
          dimnames = list(1:length(n), x@coef.names))
 }

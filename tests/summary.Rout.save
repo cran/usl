@@ -1,6 +1,6 @@
 
-R version 3.4.1 (2017-06-30) -- "Single Candle"
-Copyright (C) 2017 The R Foundation for Statistical Computing
+R version 3.6.2 (2019-12-12) -- "Dark and Stormy Night"
+Copyright (C) 2019 The R Foundation for Statistical Computing
 Platform: x86_64-apple-darwin15.6.0 (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -15,9 +15,7 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 'help.start()' for an HTML browser interface to help.
 Type 'q()' to quit R.
 
-> #
-> # Test function summary
-> #
+> # summary.R --- Test function summary
 > 
 > library(usl)
 > 
@@ -30,26 +28,25 @@ Type 'q()' to quit R.
 Call:
 usl(formula = throughput ~ load, data = specsdm91)
 
-Scale Factor for normalization: 64.9 
-
 Efficiency:
-   Min     1Q Median     3Q    Max 
-0.1214 0.2254 0.3966 0.7799 1.0000 
+    Min      1Q  Median      3Q     Max 
+0.08757 0.16257 0.28600 0.56241 0.72115 
 
 Residuals:
    Min     1Q Median     3Q    Max 
--70.89 -23.59  19.39  86.14 274.88 
+-81.66 -48.29 -25.09  29.52 111.09 
 
 Coefficients:
         Estimate  Std. Error  t value  Pr(>|t|)    
-sigma  1.705e-02   3.318e-03    5.137   0.00365  **
-kappa  7.892e-05   2.492e-05    3.167   0.02489  * 
+alpha  2.773e-02   9.122e-03    3.040   0.03841  * 
+beta   1.044e-04   1.988e-05    5.251   0.00629  **
+gamma  9.000e+01   1.421e+01    6.332   0.00318  **
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 140.6 on 5 degrees of freedom
-Multiple R-squared: 0.9624,	Adjusted R-squared: 0.9549
+Residual standard error: 82.85 on 4 degrees of freedom
+Multiple R-squared: 0.9896,	Adjusted R-squared: 0.9875
 > 
 > proc.time()
    user  system elapsed 
-  0.448   0.069   0.503 
+  0.453   0.110   0.549 

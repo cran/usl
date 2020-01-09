@@ -1,4 +1,4 @@
-# Copyright (c) 2013, 2014 Stefan Moeding
+# Copyright (c) 2013-2020 Stefan Moeding
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -43,9 +43,9 @@
 #' If the parameter \code{bounds} is set to \code{TRUE} then the plot also
 #' shows dotted lines for the theoretical bounds of scalability. These are
 #' the linear scalability for small loads and Amdahl's asymptote for the
-#' limit of scalability as load approaches infinity. 
-#' 
-#' The parameters \code{sigma} or \code{kappa} are useful to do a what-if
+#' limit of scalability as load approaches infinity.
+#'
+#' The parameters \code{alpha} or \code{beta} are useful to do a what-if
 #' analysis. Setting these parameters override the model parameters and show
 #' how the system would behave with a different contention or coherency delay
 #' parameter.
@@ -57,10 +57,10 @@
 #'   will be plotted.
 #' @param xlab A title for the x axis: see \code{\link{title}}.
 #' @param ylab A title for the y axis: see \code{\link{title}}.
-#' @param bounds Add the bounds of scalability to the plot. 
-#' @param sigma Optional parameter to be used for evaluation instead of the
+#' @param bounds Add the bounds of scalability to the plot.
+#' @param alpha Optional parameter to be used for evaluation instead of the
 #'   parameter computed for the model.
-#' @param kappa Optional parameter to be used for evaluation instead of the
+#' @param beta Optional parameter to be used for evaluation instead of the
 #'   parameter computed for the model.
 #' @param ... Other graphical parameters passed to plot
 #'   (see \code{\link{par}}, \code{\link{plot.function}}).
@@ -81,7 +81,7 @@ setMethod(
   f = "plot",
   signature = "USL",
   definition = function(x, from = NULL, to = NULL, xlab = NULL, ylab = NULL,
-                        bounds = FALSE, sigma, kappa, ...) {
+                        bounds = FALSE, alpha, beta, ...) {
     # Take range from the model if not specified
     if (missing(from)) from <- min(x@frame[, x@regr])
     if (missing(to)) to <- max(x@frame[, x@regr])
@@ -91,23 +91,23 @@ setMethod(
     if (missing(ylab)) ylab <- x@resp
 
     # Use explicitly specified coefficients
-    if (missing(sigma)) sigma <- coef(x)[['sigma']]
-    if (missing(kappa)) kappa <- coef(x)[['kappa']]
+    if (missing(alpha)) alpha <- coef(x)[['alpha']]
+    if (missing(beta)) beta <- coef(x)[['beta']]
 
     # Get the function to calculate scalability for the model
-    .func <- scalability(x, sigma, kappa)
+    .func <- scalability(x, alpha, beta)
 
     # Plot the scalability function
     plot(x = .func, from = from, to = to, xlab = xlab, ylab = ylab, ...)
-    
+
     # Add theoretical bounds of scalability to the plot
     if (bounds) {
       # Bound 1: linear scalability
-      abline(a = 0, b = x@scale.factor, lty = "dotted")
-      
+      abline(a = 0, b = coef(x)[['gamma']], lty = "dotted")
+
       # Bound 2: Amdahl's asymptote
-      if (sigma > 0) {
-        abline(h = 1/sigma * x@scale.factor, lty = "dotted")
+      if (alpha > 0) {
+        abline(h = 1/alpha * coef(x)[['gamma']], lty = "dotted")
       }
     }
   }

@@ -1,4 +1,4 @@
-# Copyright (c) 2013, 2014 Stefan Moeding
+# Copyright (c) 2013-2020 Stefan Moeding
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,11 +33,11 @@
 #' @param frame The model frame containing the variables in the model.
 #' @param regr The name of the regressor variable in the model.
 #' @param resp The name of the response variable in the model.
-#' @param scale.factor A numeric value for the scale of the model. This is the
-#'     factor by which the model values have been reduced to get a normalized
-#'     model.
-#' @param sigma The contention parameter of the model.
-#' @param kappa The coherency delay parameter of the model.
+#' @param alpha The contention parameter of the model.
+#' @param beta The coherency delay parameter of the model.
+#' @param gamma The slope of the ideal parallel scaling of the three parameter
+#'     model. This parameter corrsponds to the scale.factor parameter of the
+#'     two parameter model.
 #'
 #' @return An object of the specific type.
 #'
@@ -46,16 +46,15 @@
 setMethod(
   f = "initialize",
   signature = "USL",
-  definition = function(.Object, call, frame, regr, resp, scale.factor, sigma, kappa) {
+  definition = function(.Object, call, frame, regr, resp, alpha, beta, gamma) {
     .Object@call         <- call
-    .Object@coefficients <- structure(c(sigma, kappa), names = .Object@coef.names)
+    .Object@coefficients <- structure(c(alpha, beta, gamma), names = .Object@coef.names)
     .Object@frame        <- frame
     .Object@regr         <- regr
     .Object@resp         <- resp
-    .Object@scale.factor <- scale.factor
-    .Object@efficiency   <- structure(frame[[resp]] / scale.factor / frame[[regr]],
+    .Object@efficiency   <- structure(frame[[resp]] / gamma / frame[[regr]],
                                       names = frame[, regr])
-    .Object@df.residual  <- length(frame[[resp]]) - 2L
+    .Object@df.residual  <- length(frame[[resp]]) - length(.Object@coef.names)
 
     # Call inspector
     validObject(.Object)

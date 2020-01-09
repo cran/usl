@@ -54,39 +54,36 @@ plot(usl.model, add = TRUE)
 predict(usl.model, data.frame(processors = c(96, 128)))
 
 ## ---------------------------------------------------------------------------
-peak.scalability(usl.model)
-
-## ---------------------------------------------------------------------------
 library(usl)
 data(specsdm91)
 specsdm91
 
 ## ---------------------------------------------------------------------------
-usl.model <- usl(throughput ~ load, specsdm91, method = "nlxb")
+usl.model <- usl(throughput ~ load, specsdm91, method = "nls")
 
 ## ---------------------------------------------------------------------------
 summary(usl.model)
 
 ## ---------------------------------------------------------------------------
 peak.scalability(usl.model)
-peak.scalability(usl.model, kappa = 0.00005)
+peak.scalability(usl.model, beta = 0.00005)
 
 ## ----'spplot1', fig.show='hide'---------------------------------------------
 plot(specsdm91, pch = 16, ylim = c(0,2500))
 plot(usl.model, add = TRUE)
-cache.scale <- scalability(usl.model, kappa = 0.00005)
+cache.scale <- scalability(usl.model, beta = 0.00005)
 curve(cache.scale, lty = 2, add = TRUE)
 
 ## ----'spplot2', echo=FALSE, fig.cap='The result of the SPEC SDM91 benchmark for a SPARCcenter 2000 (dots) together with the calculated scalability function (solid line) and a hypothetical scalability function (dashed line)'----
 plot(specsdm91, pch = 16, ylim = c(0,2500))
 plot(usl.model, add = TRUE)
-cache.scale <- scalability(usl.model, kappa = 0.00005)
+cache.scale <- scalability(usl.model, beta = 0.00005)
 curve(cache.scale, lty = 2, add = TRUE)
 
 ## ---------------------------------------------------------------------------
 scalability(usl.model)(peak.scalability(usl.model))
-scf <- scalability(usl.model, kappa = 0.00005)
-scf(peak.scalability(usl.model, kappa = 0.00005))
+scf <- scalability(usl.model, beta = 0.00005)
+scf(peak.scalability(usl.model, beta = 0.00005))
 
 ## ---------------------------------------------------------------------------
 load <- with(specsdm91, expand.grid(load = seq(min(load), max(load))))
@@ -118,7 +115,8 @@ ovhd <- overhead(usl.model, newdata = load)
 ovhd
 
 ## ----'ovplot1', fig.cap='Decomposition of the execution time for parallelized workloads of the SPECSDM91 benchmark. The time is measured as a fraction of the time needed for serial execution of the workload.'----
-barplot(height = t(ovhd), names.arg = load[, 1], xlab = names(load), legend.text = TRUE)
+barplot(height = t(ovhd), names.arg = load[, 1],
+         xlab = names(load), legend.text = TRUE)
 
 ## ---------------------------------------------------------------------------
 data(oracledb)
@@ -128,9 +126,10 @@ head(subset(oracledb, select = c(timestamp, db_time, txn_rate)))
 plot(txn_rate ~ timestamp, oracledb, pch = 20, xlab = "Time of day", ylab = "Txn / sec")
 
 ## ----'orausl1', fig.cap='Relationship between the transaction rate and the number of average active sessions in an Oracle database system'----
-usl.oracle <- usl(txn_rate ~ db_time, oracledb, method = "nlxb")
+plot(txn_rate ~ db_time, oracledb,
+      xlab = "Average active sessions", ylab = "Txn / sec")
 
-plot(txn_rate ~ db_time, oracledb, xlab = "Average active sessions", ylab = "Txn / sec")
+usl.oracle <- usl(txn_rate ~ db_time, oracledb)
 plot(usl.oracle, add = TRUE)
 
 ## ---------------------------------------------------------------------------

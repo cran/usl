@@ -1,6 +1,4 @@
-#
-# Test function confint
-#
+# confint.R --- Test function confint
 
 library(usl)
 
@@ -14,11 +12,16 @@ u <- usl(throughput ~ processors, data = raytracer)
 
 coef(u)
 
+confint(u)
+
 confint(u, parm=1)
-confint(u, parm="sigma")
+confint(u, parm="alpha")
 
 confint(u, parm=2)
-confint(u, parm="kappa")
+confint(u, parm="beta")
 
 confint(u, parm=3)
+confint(u, parm="gamma")
+
+confint(u, parm=4)
 confint(u, parm="none")
