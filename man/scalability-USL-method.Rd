@@ -5,7 +5,7 @@
 \alias{scalability}
 \title{Scalability function of a USL model}
 \usage{
-\S4method{scalability}{USL}(object, alpha, beta)
+\S4method{scalability}{USL}(object, alpha, beta, gamma)
 }
 \arguments{
 \item{object}{A USL object.}
@@ -14,6 +14,9 @@
 parameter computed for the model.}
 
 \item{beta}{Optional parameter to be used for evaluation instead of the
+parameter computed for the model.}
+
+\item{gamma}{Optional parameter to be used for evaluation instead of the
 parameter computed for the model.}
 }
 \value{
@@ -28,7 +31,7 @@ calculate the scalability for the specific USL model.
 The returned function can be used to calculate specific values once the
 model for a system has been created.
 
-The parameters \code{alpha} or \code{beta} are useful to do a what-if
+The parameters \code{alpha} and \code{beta} are useful to do a what-if
 analysis. Setting these parameters override the model parameters and show
 how the system would behave with a different contention or coherency delay
 parameter.
@@ -39,13 +42,13 @@ require(usl)
 data(raytracer)
 
 ## Compute the scalability function
-s <- scalability(usl(throughput ~ processors, raytracer))
+scf <- scalability(usl(throughput ~ processors, raytracer))
 
 ## Print scalability for 32 CPUs for the demo dataset
-print(s(32))
+print(scf(32))
 
 ## Plot scalability for the range from 1 to 64 CPUs
-plot(s, from=1, to=64)
+plot(scf, from=1, to=64)
 
 }
 \references{
@@ -54,5 +57,8 @@ Neil J. Gunther. Guerrilla Capacity Planning: A Tactical
   Springer, Heidelberg, Germany, 1st edition, 2007.
 }
 \seealso{
-\code{\link{usl}}, \code{\link{peak.scalability,USL-method}}
+\code{\link{usl}},
+  \code{\link{peak.scalability,USL-method}}
+  \code{\link{optimal.scalability,USL-method}}
+  \code{\link{limit.scalability,USL-method}}
 }

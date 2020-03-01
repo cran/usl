@@ -69,7 +69,7 @@ The Universal Scalability Law can be expressed with following formula.
 \code{C(N)} predicts the relative capacity of the system for a given
 load \code{N}:
 
-\deqn{C(N) = \frac{\gamma N}{1 + \alpha (N - 1) + \beta N (N - 1)}}{C(N) = N / (1 + \alpha * (N - 1) + \beta * N * (N - 1))}
+\deqn{C(N) = \frac{\gamma N}{1 + \alpha (N - 1) + \beta N (N - 1)}}{C(N) = (\gamma N) / (1 + \alpha * (N - 1) + \beta * N * (N - 1))}
 }
 \examples{
 require(usl)
@@ -108,7 +108,10 @@ John C. Nash. nlsr: Functions for nonlinear least squares
 \code{\link{efficiency,USL-method}},
   \code{\link{scalability,USL-method}},
   \code{\link{peak.scalability,USL-method}},
+  \code{\link{optimal.scalability,USL-method}},
+  \code{\link{limit.scalability,USL-method}},
   \code{\link{summary,USL-method}},
+  \code{\link{sigma,USL-method}}
   \code{\link{predict,USL-method}},
   \code{\link{overhead,USL-method}},
   \code{\link{confint,USL-method}},

@@ -1,7 +1,19 @@
+CHANGES in `usl' VERSION 3.0.0 (2020-02-29)
+
+* Extend `scalability()` function to accept additional parameter `gamma`.
+* Removed R-squared in `summary()` output as it is not valid for nonlinear
+  regression.
+* Implemented method `sigma` to extract the residual standard deviation.
+* Implemented methods `optimal.scalability()` and `limit.scalability()`
+  to determine scalability bounds.
+* Print scalability bounds in `summary()` output and optionally include these
+  bounds in the `plot()` output.
+
+
 CHANGES in `usl' VERSION 2.0.0 (2020-01-08)
 
 * Version 2.0.0 is a major update that includes some breaking changes. The
-  Universal Scalability Law has evolved from the originial two coefficient
+  Universal Scalability Law has evolved from the original two coefficient
   formula into a three coefficient formula to obviate the need for parameter
   normalization. The following changes are made to align the package with
   the current use:

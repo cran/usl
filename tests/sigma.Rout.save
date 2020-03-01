@@ -15,29 +15,17 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 'help.start()' for an HTML browser interface to help.
 Type 'q()' to quit R.
 
-> # scalability.R --- Test function scalability
+> # sigma.R --- Test function sigma
 > 
 > library(usl)
 > 
 > data(specsdm91)
 > 
 > u <- usl(throughput ~ load, specsdm91)
-> s1 <- scalability(u)
-> s2 <- scalability(u, 0.001, 0.00001)
-> s3 <- scalability(u, 0.001, 0.00001, 100)
 > 
-> # Calculate scalability
-> signif(s1(20), 2)
-[1] 1100
-> 
-> # Calculate scalability for different coefficients
-> signif(s2(20), 2)
-[1] 1800
-> 
-> # Calculate scalability for different gamma
-> signif(s3(20), 2)
-[1] 2000
+> signif(sigma(u), digits=3)
+[1] 82.8
 > 
 > proc.time()
    user  system elapsed 
-  0.444   0.108   0.543 
+  0.453   0.110   0.549 

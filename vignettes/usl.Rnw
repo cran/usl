@@ -51,9 +51,9 @@ if (before && options$fig.show != 'none')
 })
 
 opts_chunk$set(prompt=TRUE, comment=NA, tidy=FALSE, warning=FALSE)
-opts_chunk$set(size='footnotesize', out.width='0.97\\textwidth')
+opts_chunk$set(size='footnotesize', out.width='0.98\\textwidth')
 opts_chunk$set(fig.width=7, fig.height=3.6, fig.align='center')
-opts_chunk$set(fig.path='usl-', small.mar=TRUE)
+opts_chunk$set(fig.path='usl-', fig.pos='htbp', small.mar=TRUE)
 
 @
 
@@ -105,16 +105,16 @@ planning. It provides an analytic model for the scalability of a computer
 system.
 
 A comprehensive introduction to the Universal Scalability Law including the
-mathematical grounding has been published in \cite{Gun07}.
+mathematical grounding has been published by Dr.~Gunther (cf. \cite{Gun07}).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Background}
 
-Dr.~Gunther shows in \cite{Gun07} how the scalability of every computer
-system can be described by a common rational function. This function is
-\emph{universal} in the sense that it does not assume any specific type of
-software, hardware or system architecture.
+Dr.~Gunther shows how the scalability of every computer system can be
+described by a common rational function. This function is \emph{universal} in
+the sense that it does not assume any specific type of software, hardware or
+system architecture.
 
 \Cref{eqn:usl2} illustrates the original Universal Scalability Law where
 $C(N) = X(N) / X(1)$ is the relative capacity given by the ratio of the
@@ -149,22 +149,19 @@ Due to the quadratic characteristic of the coherency term there will be a
 point where the throughput of the system will start to go retrograde, i.e.,
 will start to decrease with further increasing load.
 
-In \cite{Gun07} Dr.~Gunther proves that \cref{eqn:usl2} is reduced to Amdahl's
-Law for $\beta = 0$. Therefore the Universal Scalability Law can be seen as
-a generalization of Amdahl's Law for speedup in parallel computing.
+Dr.~Gunther proved that \cref{eqn:usl2} is reduced to Amdahl's Law for
+$\beta = 0$ (cf. \cite{Gun07}). Therefore the Universal Scalability Law can be
+seen as a generalization of Amdahl's Law for speedup in parallel computing.
 
-We can solve this nonlinear equation to estimate the coefficients $\alpha$
-and $\beta$ using a sparse set of measurements for the throughput $X_i$ at
-different loads $N_i$. The computations used to solve the equation for the
-measured values are discussed in \cite{Gun07}.
-
-Initially the Unversal Scalabilty Law normalized the measurements using the
-throughput $X(1)$ for load $1$ as the point of reference. This placed an
-additional burden on the performance analyst who needed to either measure the
-value or find a smart way to estimate it.
+We can solve this nonlinear equation to estimate the coefficients $\alpha$ and
+$\beta$ using a sparse set of measurements for the throughput $X_i$ at
+different loads $N_i$. Initially the Unversal Scalabilty Law normalized the
+measurements using the throughput $X(1)$ for load $1$ as the point of reference.
+This placed an additional burden on the performance analyst who needed to either
+measure the value or find a smart way to estimate it.
 
 It was then discovered that a third coefficient $\gamma$ can be added to the
-formula to represent the missing point of reference (\cite{Gun:usl3}).
+formula to represent the missing point of reference (cf. \cite{Gun:usl3}).
 \Cref{eqn:usl3} shows the updated Universal Scalability Law using three
 parameters.
 
@@ -172,20 +169,21 @@ parameters.
 X(N) = \frac{\gamma N}{1 + \alpha (N - 1) + \beta N (N - 1)}
 \end{equation}
 
-A nonlinear regression will solve this equation and find best-fit values for
-all three parameters $\alpha$, $\beta$ and $\gamma$.
+Nonlinear regression will solve this equation and find best-fit values for
+the three parameters $\alpha$, $\beta$ and $\gamma$.
 
 The \usl{} package has been created to subsume the computation into one
 simple function call. This greatly reduces the manual work that previously
 was needed to perform the scalability analysis.
 
-Note that in \cite{Gun07} the coefficients are called $\sigma$ and $\kappa$
-when hardware scalability is evaluated but $\alpha$ and $\beta$ when software
-scalability is analyzed. Up to version 1.8.0 the \usl{} package always used
-\texttt{sigma} and \texttt{kappa} as coefficients. This has been changed
-starting with the 2.0.0 release of the \usl{} package. Now the package will
-also use \texttt{alpha} and \texttt{beta} as coefficient names to follow
-Dr.~Gunther's nomenclature.
+Initially the coefficients are called $\sigma$ and $\kappa$ when hardware
+scalability is evaluated but $\alpha$ and $\beta$ when software scalability
+is analyzed. Up to version 1.8.0 the \usl{} package always used \texttt{sigma}
+and \texttt{kappa} as coefficients. This has been changed starting with the
+2.0.0 release of the \usl{} package. Now the package will also use
+\texttt{alpha} and \texttt{beta} as coefficient names to follow Dr.~Gunther's
+nomenclature. Additionally the \texttt{gamma} parameter was added to implement
+the Universal Scalability Law with three parameters.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -227,7 +225,7 @@ the available range from one to 64 processors. We can easily see that the
 benefit for switching from one processor to four processors is much larger
 than the gain for upgrading from 48 to 64 processors.
 
-Create a simple scatterplot to get a grip on the data.
+Create a simple scatterplot to visualize the raw data.
 
 <<'rtplot1', fig.show='hide'>>=
 plot(throughput ~ processors, data = raytracer)
@@ -285,10 +283,15 @@ information.
   processor. In this case we actually have a measurement for the single
   processor case but for a real-world analysis this value if often unknown or
   can't be measured. The difference between the value of $\gamma$ and the
-  measurement is also caused by the regression.
-\item Finally $R^2$ estimates how well the model fits the data. We can see
-  that the model is able to explain about
-  \Sexpr{floor(100*summary(usl.model)$r.squared)} percent of the data.
+  measurement is also caused by the regression. The difference should be small
+  if the regression finds a reasonable model.
+\item The residual standard error estimates how well the model fits the data.
+  We can see that the difference between the model prediction and the measured
+  values is typically within $\Sexpr{signif(sigma(usl.model), 3)}$ ray-tracing
+  operations per second.
+\item Finally the scalability bounds are printed. These bounds state important
+  limits of the scalability as defined by the model. We will look at the
+  meaning of these values shortly.
 \end{itemize}
 
 The function \kbd{efficiency()} extracts the efficiency values from the model
@@ -312,38 +315,62 @@ measured values. Values larger than $1.0$ usually need a closer
 investigation. It is also suspicious if the efficiency gets bigger when the
 load increases.
 
-The model coefficients can be retrieved with the \kbd{coef()} function.
+The model coefficients alone can be retrieved with the \kbd{coef()} function.
 
 <<>>=
 coef(usl.model)
 @
 
-We can see that the model estimates the contention parameter to be about
-$\Sexpr{signif(100 * coef(usl.model)[['alpha']], 2)}$ percent and the coherency
-parameter to be $\Sexpr{signif(coef(usl.model)[['beta']], 2)}$.
+We can see that the model estimates the contention parameter $\alpha$ to be
+about $\Sexpr{signif(100 * coef(usl.model)[['alpha']], 2)}$ percent and the
+coherency parameter $\beta$ to be $\Sexpr{signif(coef(usl.model)[['beta']], 2)}$.
 
 With $\beta = 0$ the model indicates no coherency penalty for the system. In
-this case the throughput will asymptotically approach an upper bound $X_{max}$
-as the number of processors is increased. This bound can be calculated using
-\cref{eqn:amdahl}.
+this case the throughput will asymptotically approach an upper bound as the
+number of processors is increased. The summary output above indicates a limit
+of $\Sexpr{signif(summary(usl.model)$limit, 3)}$ as the upper bound for the
+maximal achievable throughput. There is no way to increase the throughput
+beyond that number, no matter how many processors are available whatsoever.
 
-\begin{equation}\label{eqn:amdahl}
-X_{max} = \gamma \alpha^{-1}
-\end{equation}
+For $\beta = 0$ the predicted throughput never reaches a maximum. Theoretically
+the throughput could always be increased by adding more processors. At the
+same time it is limited as stated in the previous paragraph. So the improvement
+becomes infinitesimal for more and more processors.
 
-The model predicts a limit of
-$\Sexpr{signif((1/coef(usl.model)[['alpha']]) * coef(usl.model)[['gamma']], 3)}$
-as the upper bound for the maximal achievable throughput. According to the
-model there is no way to increase the throughput that number, no matter how
-many processors are available whatsoever.
+To get an impression of the scalability function we can use the \kbd{plot()}
+function and create a combined graph with the original data as dots and the
+calculated scalability function as a solid line. The scalability bounds are
+added as dotted lines to the output. \Cref{fig:rtplot3} has the result of that
+plot.
 
-The corresponding confidence intervals\footnotemark{} for the model coefficients
-are returned by calling the \kbd{confint()} function.
+<<'rtplot3', fig.cap='Throughput of a raytracing software using different numbers of processors'>>=
+plot(throughput ~ processors, data = raytracer, pch = 16, ylim = c(0, 400))
+plot(usl.model, add = TRUE, bounds = TRUE)
+@
 
-\footnotetext{Earlier releases of the \usl{} package used bootstrapping to
-estimate the confidence intervals. This has been changed since bootstrapping
-with a small sample size may not give the desired accuracy. Now the confidence
-intervals are calculated from the standard errors of the parameters.}
+<<'bounds', echo=FALSE>>=
+Xroof <- usl.model$limit
+Nopt  <- usl.model$optimal[1]
+Xopt  <- usl.model$optimal[2]
+@
+
+The plot has dotted lines for the upper limit defined by Amdahl (here for a
+throughput of $\Sexpr{signif(Xroof, 3)}$) and the linear scalability we strive
+to see in all our applications. Unfortunately the throughput falls away from
+the linear path rather quickly.
+
+Optimal scalability is reached at $\Sexpr{signif(Nopt, 3)}$ processors
+performing $\Sexpr{signif(Xopt, 3)}$ ray-tracing operations per second. The
+optimum is defined as the point on the x-axis below the intersection of the
+linear scalability bound and the scalability limit defined by Amdahl's Law.
+
+Running a system below this point will underutilize already purchased capacity.
+But pushing the system above this point leads to \emph{diminishing returns}.
+The point of optimal scalability is also given in the output of the
+\kbd{summary()} function as shown before.
+
+The confidence intervals for the model coefficients are returned by calling the
+\kbd{confint()} function.
 
 <<>>=
 confint(usl.model, level = 0.95)
@@ -351,21 +378,11 @@ confint(usl.model, level = 0.95)
 
 The confidence interval shows for a given confidence level the expected range
 that the true value lies in. We can see that the true $\beta$ might in fact not
-really be zero. One reason is that all measurements contain measurement and 
+really be zero. One reason is that all measurements contain measurement and
 observation errors. The other reason is that a very small $\beta$ might only
 cause a measurable effect when a much higher number of processors are used.
 
-To get an impression of the scalability function we can use the \kbd{plot()}
-function and create a combined graph with the original data as dots and the
-calculated scalability function as a solid line. \Cref{fig:rtplot3} has the
-result of that plot.
-
-<<'rtplot3', fig.cap='Throughput of a raytracing software using different numbers of processors'>>=
-plot(throughput ~ processors, data = raytracer, pch = 16)
-plot(usl.model, add = TRUE)
-@
-
-SGI marketed the Origin 2000 with up to 128 processors. Let's assume that
+SGI marketed the Origin~2000 with up to 128 processors. Let's assume that
 going from 64 to 128 processors does not introduce any additional limitations
 to the system architecture. Then we can use the existing model and forecast
 the system throughput for other numbers like 96 and 128 processors using the
@@ -382,8 +399,8 @@ for 128 processors.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Case Study: Software Scalability}
 
-In this section we will perform an analysis of a SPEC benchmark. A Sun
-SPARCcenter 2000 with 16 CPUs was used in October 1994 for the SDM91
+In this section we will perform an analysis of a SPEC benchmark. A
+SPARCcenter~2000 with 16 CPUs was used in October 1994 for the SDM91
 benchmark\footnote{\url{http://www.spec.org/osg/sdm91/results/results.html}}.
 The benchmark simulates a number of users working on a UNIX server (editing
 files, compiling \dots) and measures the number of script executions per
@@ -421,13 +438,13 @@ There are currently three possible values for the \texttt{method} parameter:
   to solve the model. So all restrictions of the ``port'' algorithm apply.
 \item[\texttt{nlxb}:] A nonlinear regression model is also used in this case.
   But instead of the \kbd{nls()} function it uses the \kbd{nlxb()} function
-  from the nlsr package (see \cite{R:nlsr}). It is expected to be more robust
+  from the nlsr package (cf. \cite{R:nlsr}). It is expected to be more robust
   than the \texttt{nls} method.
 \item[\texttt{default}:] The default method traditionally used a transformation
   into a \nth{2} degree polynomial and required the data to be normalized. This
   was the original algorithm for the two-parameter Universal Scalability Law
-  introduced in chapter 5.2.3 of \cite{Gun07}. Starting with version 2.0.0 of
-  the \usl{} package this algorithm is no longer available. The \kbd{nlxb()}
+  (cf. chapter 5.2.3 of \cite{Gun07}). Starting with version 2.0.0 of the
+  \usl{} package this algorithm is no longer available. The \kbd{nlxb()}
   function is used instead.
 \end{labeling}
 
@@ -440,10 +457,11 @@ summary(usl.model)
 
 Looking at the coefficients we notice that $\alpha$ is about
 \Sexpr{signif(coef(usl.model)[['alpha']], 2)} and $\beta$ is about
-\Sexpr{signif(coef(usl.model)[['beta']], 1)}. The parameter $\alpha$
-indicates that about \Sexpr{signif(100*coef(usl.model)[['alpha']], 2)}
-percent of the execution time is strictly serial. Note that this serial
-fraction is also recognized in Amdahl's Law.
+\Sexpr{signif(coef(usl.model)[['beta']], 1)}. The parameter $\alpha$ indicates
+that about \Sexpr{signif(100*coef(usl.model)[['alpha']], 2)} percent of the
+execution time is strictly serial. As a rule of thumb we can say that $3$
+percent is an excellent value for a reasonable complex application. Note that
+this serial fraction is also recognized in Amdahl's Law.
 
 We hypothesize that a proposed change to the system --- maybe a redesign of
 the cache architecture or the elimination of a point to point communication
@@ -477,14 +495,16 @@ range of the plotted values with the first command.
 <<'spplot1', fig.show='hide'>>=
 plot(specsdm91, pch = 16, ylim = c(0,2500))
 plot(usl.model, add = TRUE)
+
+# Create function cache.scale to perform calculations with the model
 cache.scale <- scalability(usl.model, beta = 0.00005)
 curve(cache.scale, lty = 2, add = TRUE)
 @
 
-We used the function \kbd{scalability()} here. This function is a higher
-order function returning a function and not just a single value. That makes
-it possible to use the \kbd{curve()} function to plot the values over the
-specific range.
+We used the function \kbd{scalability()} here. It is a higher order function
+returning a function and not just a single value. The return value is assigned
+to define \kbd{cache.scale}. That makes it possible to use the \kbd{curve()}
+function to plot the values over the specific range.
 
 \Cref{fig:spplot2} shows the measured throughput in scripts per hour for a
 given load, i.e., the number of simulated users. The solid line indicates the
@@ -500,13 +520,15 @@ Increasing the load beyond that point leads to retrograde behavior, i.e., the
 throughput decreases again. As we have calculated earlier, the measured
 system will reach this point sooner than the hypothetical system.
 
-We can combine the \kbd{scalability()} and the \kbd{peak.scalability()}
-functions to get the predicted throughput values for the peak values.
+We can combine the \kbd{cache.scale()} (defined before) and
+\kbd{peak.scalability()} functions to get the predicted throughput values for
+the peak values.
 
 <<>>=
 scalability(usl.model)(peak.scalability(usl.model))
-scf <- scalability(usl.model, beta = 0.00005)
-scf(peak.scalability(usl.model, beta = 0.00005))
+
+# Use cache.scale function defined before
+cache.scale(peak.scalability(usl.model, beta = 0.00005))
 @
 
 This illustrates how the Universal Scalability Law can help to decide if the
@@ -575,16 +597,22 @@ already seen in \cref{dimret}. The real execution time is in fact the sum of
 the ideal execution time and the overhead for dealing with contention and
 coherency delays.
 
-Dr.~Gunther shows in \cite{DBLP:journals/corr/abs-0808-1431} how the total
-execution time of a parallelized workload depends on the degree of
+The total execution time of a parallelized workload depends on the degree of
 parallelism $p$ and the coefficients $\alpha$ and $\beta$ of the associated
-USL model. Equation 26 in his paper identifies the magnitude of the three
-components --- given as fractions of the serial execution time $T_1$ --- that
-account for the total execution time of the parallelized workload.
+USL model.
+
+The magnitude of the three components --- given as fractions of the serial
+execution time $T_1$ --- that account for the total execution time of the
+parallelized workload can be calculated as follows
+(cf. \cite{DBLP:journals/corr/abs-0808-1431} eqn. 26).
 
 \begin{align}
-T_{ideal}      &= \frac{1}{p} T_1\label{eqn:ideal}\\
-T_{contention} &= \alpha \left(\frac{p-1}{p}\right) T_1\label{eqn:contention}\\
+T_{ideal}      &= \frac{1}{p} T_1\label{eqn:ideal}
+\end{align}
+\begin{align}
+T_{contention} &= \alpha \left(\frac{p-1}{p}\right) T_1\label{eqn:contention}
+\end{align}
+\begin{align}
 T_{coherency}  &= \beta \frac{1}{2} (p-1) T_1\label{eqn:coherency}
 \end{align}
 
@@ -802,7 +830,7 @@ about the way the application was using the database.
 % @
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibliographystyle{alpha}
+\bibliographystyle{plain}
 \bibliography{usl}
 
 \end{document}

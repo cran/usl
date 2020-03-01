@@ -12,9 +12,9 @@ if (before && options$fig.show != 'none')
 })
 
 opts_chunk$set(prompt=TRUE, comment=NA, tidy=FALSE, warning=FALSE)
-opts_chunk$set(size='footnotesize', out.width='0.97\\textwidth')
+opts_chunk$set(size='footnotesize', out.width='0.98\\textwidth')
 opts_chunk$set(fig.width=7, fig.height=3.6, fig.align='center')
-opts_chunk$set(fig.path='usl-', small.mar=TRUE)
+opts_chunk$set(fig.path='usl-', fig.pos='htbp', small.mar=TRUE)
 
 
 ## ---------------------------------------------------------------------------
@@ -43,12 +43,17 @@ barplot(efficiency(usl.model), ylab = "efficiency / processor", xlab = "processo
 ## ---------------------------------------------------------------------------
 coef(usl.model)
 
+## ----'rtplot3', fig.cap='Throughput of a raytracing software using different numbers of processors'----
+plot(throughput ~ processors, data = raytracer, pch = 16, ylim = c(0, 400))
+plot(usl.model, add = TRUE, bounds = TRUE)
+
+## ----'bounds', echo=FALSE---------------------------------------------------
+Xroof <- usl.model$limit
+Nopt  <- usl.model$optimal[1]
+Xopt  <- usl.model$optimal[2]
+
 ## ---------------------------------------------------------------------------
 confint(usl.model, level = 0.95)
-
-## ----'rtplot3', fig.cap='Throughput of a raytracing software using different numbers of processors'----
-plot(throughput ~ processors, data = raytracer, pch = 16)
-plot(usl.model, add = TRUE)
 
 ## ---------------------------------------------------------------------------
 predict(usl.model, data.frame(processors = c(96, 128)))
@@ -71,19 +76,24 @@ peak.scalability(usl.model, beta = 0.00005)
 ## ----'spplot1', fig.show='hide'---------------------------------------------
 plot(specsdm91, pch = 16, ylim = c(0,2500))
 plot(usl.model, add = TRUE)
+
+# Create function cache.scale to perform calculations with the model
 cache.scale <- scalability(usl.model, beta = 0.00005)
 curve(cache.scale, lty = 2, add = TRUE)
 
 ## ----'spplot2', echo=FALSE, fig.cap='The result of the SPEC SDM91 benchmark for a SPARCcenter 2000 (dots) together with the calculated scalability function (solid line) and a hypothetical scalability function (dashed line)'----
 plot(specsdm91, pch = 16, ylim = c(0,2500))
 plot(usl.model, add = TRUE)
+
+# Create function cache.scale to perform calculations with the model
 cache.scale <- scalability(usl.model, beta = 0.00005)
 curve(cache.scale, lty = 2, add = TRUE)
 
 ## ---------------------------------------------------------------------------
 scalability(usl.model)(peak.scalability(usl.model))
-scf <- scalability(usl.model, beta = 0.00005)
-scf(peak.scalability(usl.model, beta = 0.00005))
+
+# Use cache.scale function defined before
+cache.scale(peak.scalability(usl.model, beta = 0.00005))
 
 ## ---------------------------------------------------------------------------
 load <- with(specsdm91, expand.grid(load = seq(min(load), max(load))))

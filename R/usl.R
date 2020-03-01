@@ -152,7 +152,7 @@ usl.solve.nlxb <- function(model) {
 #' \code{C(N)} predicts the relative capacity of the system for a given
 #' load \code{N}:
 #'
-#' \deqn{C(N) = \frac{\gamma N}{1 + \alpha (N - 1) + \beta N (N - 1)}}{C(N) = N / (1 + \alpha * (N - 1) + \beta * N * (N - 1))}
+#' \deqn{C(N) = \frac{\gamma N}{1 + \alpha (N - 1) + \beta N (N - 1)}}{C(N) = (\gamma N) / (1 + \alpha * (N - 1) + \beta * N * (N - 1))}
 #'
 #' @param formula An object of class "\code{\link{formula}}" (or one that
 #'   can be coerced to that class): a symbolic description of the model to be
@@ -170,7 +170,10 @@ usl.solve.nlxb <- function(model) {
 #' @seealso \code{\link{efficiency,USL-method}},
 #'   \code{\link{scalability,USL-method}},
 #'   \code{\link{peak.scalability,USL-method}},
+#'   \code{\link{optimal.scalability,USL-method}},
+#'   \code{\link{limit.scalability,USL-method}},
 #'   \code{\link{summary,USL-method}},
+#'   \code{\link{sigma,USL-method}}
 #'   \code{\link{predict,USL-method}},
 #'   \code{\link{overhead,USL-method}},
 #'   \code{\link{confint,USL-method}},
@@ -278,12 +281,22 @@ usl <- function(formula, data, method = "default") {
   .Object@fitted    <- structure(y.fit, names = nam)
   .Object@residuals <- structure(y.res, names = nam)
 
-  n <- length(y.obs) # sample size
-  p <- 1             # number of regressors
+  # Calculate the point where the curve has its peak
+  Nmax <- sqrt((1 - model.result[['alpha']]) / model.result[['beta']])
+  Xmax <- model.result[['gamma']] * Nmax / (1 + model.result[['alpha']] * (Nmax - 1) + model.result[['beta']] * Nmax * (Nmax - 1))
 
-  .Object@r.squared     <- 1 - (sum(y.res ^ 2) / sum((y.obs - mean(y.obs)) ^ 2))
-  .Object@adj.r.squared <- 1 - (1 - .Object@r.squared) * ((n-1) / (n-p-1))
+  .Object@peak <- structure(c(Nmax, Xmax), names = c(regr, resp))
 
+  # Calculate the optimal load
+  Nopt <- abs(1 / model.result[['alpha']])
+  Xopt <- model.result[['gamma']] * Nopt / (1 + model.result[['alpha']] * (Nopt - 1) + model.result[['beta']] * Nopt * (Nopt - 1))
+
+  .Object@optimal <- structure(c(Nopt, Xopt), names = c(regr, resp))
+
+  # Calculate the scalability limit (Amdahl asymptote)
+  Xlim <- model.result[['gamma']] * Nopt
+
+  .Object@limit <- structure(c(Xlim), names = c(resp))
 
   # The following estimation of the standard errors is based on the
   # source code of the nls() function in R base.
@@ -293,15 +306,18 @@ usl <- function(formula, data, method = "default") {
 
   # residual variance
   df <- df.residual(.Object)
-  resvar <- if(df <= 0) NaN else sum(y.res ^ 2) / df
+  rv <- ifelse(df <= 0, NaN, sum(y.res ^ 2) / df)
 
-  # Build gradient matrix
+  # residual standard deviation
+  .Object@sigma <- sqrt(rv)
+
+  # gradient matrix
   grad <- gradient.usl(.Object)
 
   XtXinv <- solve(t(grad) %*% grad)
 
-  # Standard error of coefficients
-  .Object@coef.std.err <- sqrt(diag(XtXinv) * resvar)
+  # standard error of coefficients
+  .Object@coef.std.err <- sqrt(diag(XtXinv) * rv)
 
   return(.Object)
 }

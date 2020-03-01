@@ -77,13 +77,26 @@ setMethod(
 
     printCoefmat(para.mat, digits = digits, print.gap = 2)
 
-    se <- if (x@df.residual > 0) sqrt(sum(x@residuals ^ 2) / x@df.residual) else NaN
+    cat("\nResidual standard error:", format(signif(x@sigma, digits)),
+        "on", x@df.residual, "degrees of freedom\n")
 
-    cat("\nResidual standard error:",
-        format(signif(se, digits)), "on", x@df.residual, "degrees of freedom")
+    cat("\nScalability bounds:\n")
 
-    cat("\nMultiple R-squared:", formatC(x@r.squared, digits = digits))
-    cat(",\tAdjusted R-squared:", formatC(x@adj.r.squared, digits = digits))
+    cat("limit: ")
+    cat(x@resp, signif(x@limit, digits), "(Amdahl asymptote)\n")
+
+    cat("peak:  ")
+    if (x@coefficients[['beta']] > 0) {
+      cat(x@resp, signif(x@peak[2], digits), "at ")
+      cat(x@regr, signif(x@peak[1], digits), "\n")
+    }
+    else {
+      cat("none (beta=0)\n")
+    }
+
+    cat("opt:   ")
+    cat(x@resp, signif(x@optimal[2], digits), "at ")
+    cat(x@regr, signif(x@optimal[1], digits), "\n")
 
     cat("\n")
     invisible(x)
