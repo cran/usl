@@ -1,8 +1,8 @@
 Package: usl
 Type: Package
 Title: Analyze System Scalability with the Universal Scalability Law
-Version: 3.0.0
-Date: 2020-02-29
+Version: 3.0.2
+Date: 2022-08-23
 Authors@R: c(person(given="Neil J.", family="Gunther", role
     = "aut"), person(given="Stefan", family="Moeding", role
     = c("aut", "cre"), email = "stm@moeding.net"))
@@ -17,11 +17,11 @@ Description: The Universal Scalability Law (Gunther 2007)
     forecast the scalability for the system.
 License: BSD_2_clause + file LICENSE
 Encoding: UTF-8
-RoxygenNote: 7.0.2
+RoxygenNote: 7.2.1
 NeedsCompilation: no
-Packaged: 2020-02-29 12:35:37 UTC; stm
+Packaged: 2022-08-23 15:39:12 UTC; stm
 Author: Neil J. Gunther [aut],
   Stefan Moeding [aut, cre]
 Maintainer: Stefan Moeding <stm@moeding.net>
 Repository: CRAN
-Date/Publication: 2020-03-02 00:30:02 UTC
+Date/Publication: 2022-08-26 20:10:02 UTC

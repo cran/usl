@@ -1,21 +1,20 @@
 ## ----echo=FALSE-------------------------------------------------------------
 library(knitr)
-
-options(prompt="R> ", scipen=4, digits=4, width=78)
-options(str=strOptions(strict.width='cut'), show.signif.stars=TRUE)
-
 opts_knit$set(progress=FALSE, verbose=FALSE)
 
 knit_hooks$set(small.mar=function(before, options, envir) {
 if (before && options$fig.show != 'none')
-  par(mar=c(4.1, 4.1, 1.1, 2.1))
+  par(mar=c(5.1, 4.1, 1.1, 1.1), family='Helvetica', ps=11)
 })
 
-opts_chunk$set(prompt=TRUE, comment=NA, tidy=FALSE, warning=FALSE)
-opts_chunk$set(size='footnotesize', out.width='0.98\\textwidth')
-opts_chunk$set(fig.width=7, fig.height=3.6, fig.align='center')
-opts_chunk$set(fig.path='usl-', fig.pos='htbp', small.mar=TRUE)
+opts_chunk$set(prompt=TRUE, comment=NA, tidy=FALSE)
+opts_chunk$set(out.width='\\textwidth', small.mar=TRUE)
+opts_chunk$set(fig.width=7, fig.height=3.6)
+opts_chunk$set(fig.align='center', fig.pos='htbp', fig.path='usl-')
 
+options(prompt='R> ', scipen=4, digits=4, width=78)
+options(digits.secs=3, show.signif.stars=TRUE)
+options(str=strOptions(strict.width='cut'))
 
 ## ---------------------------------------------------------------------------
 library(usl)
@@ -25,7 +24,7 @@ raytracer
 ## ----'rtplot1', fig.show='hide'---------------------------------------------
 plot(throughput ~ processors, data = raytracer)
 
-## ----'rtplot2', echo=FALSE, fig.cap='Measured throughput of a raytracing software in relation to the number of available processors'----
+## ----'rtplot2', echo=FALSE, fig.cap='Measured throughput of a ray tracing software in relation to the number of available processors'----
 plot(throughput ~ processors, data = raytracer)
 
 ## ---------------------------------------------------------------------------
@@ -37,13 +36,13 @@ summary(usl.model)
 ## ---------------------------------------------------------------------------
 efficiency(usl.model)
 
-## ----'rtbarplot', fig.cap='Rate of efficiency per processor for different numbers of processors running the raytracing software'----
+## ----'rtbarplot', fig.cap='Rate of efficiency per processor for different numbers of processors running the ray tracing software'----
 barplot(efficiency(usl.model), ylab = "efficiency / processor", xlab = "processors")
 
 ## ---------------------------------------------------------------------------
 coef(usl.model)
 
-## ----'rtplot3', fig.cap='Throughput of a raytracing software using different numbers of processors'----
+## ----'rtplot3', fig.cap='Throughput of a ray tracing software using different numbers of processors'----
 plot(throughput ~ processors, data = raytracer, pch = 16, ylim = c(0, 400))
 plot(usl.model, add = TRUE, bounds = TRUE)
 

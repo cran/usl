@@ -1,4 +1,4 @@
-\documentclass[english,pagesize=auto,parskip=half,toc=bib]{scrartcl}
+\documentclass[english]{scrartcl}
 %\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{Using the USL Package to Analyze System Scalability}
 %\VignetteDepends{usl}
@@ -11,8 +11,9 @@
 \author{Stefan M\"oding}
 
 % Fonts, encoding & language support
-\usepackage{lmodern}
-\usepackage[utopia]{mathdesign}
+\usepackage{fourier}
+\usepackage[scaled]{helvet}
+\usepackage[scaled=0.76]{beramono}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{babel}
@@ -26,10 +27,15 @@
 
 % Cross references
 \usepackage[pdfusetitle,hidelinks]{hyperref}
-\usepackage{cleveref}
 \usepackage[all]{hypcap}
+\usepackage{bookmark}
+\usepackage{cleveref}
 
 \hypersetup{pdfkeywords={Scalability,Universal Scalability Law,USL,R}}
+
+% Layout
+\KOMAoption{DIV}{11}
+\KOMAoption{toc}{bib}
 
 % Define shortcut commands
 \newcommand{\R}{{\normalfont\textsf{R}}}
@@ -39,22 +45,21 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 <<echo=FALSE>>=
 library(knitr)
-
-options(prompt="R> ", scipen=4, digits=4, width=78)
-options(str=strOptions(strict.width='cut'), show.signif.stars=TRUE)
-
 opts_knit$set(progress=FALSE, verbose=FALSE)
 
 knit_hooks$set(small.mar=function(before, options, envir) {
 if (before && options$fig.show != 'none')
-  par(mar=c(4.1, 4.1, 1.1, 2.1))
+  par(mar=c(5.1, 4.1, 1.1, 1.1), family='Helvetica', ps=11)
 })
 
-opts_chunk$set(prompt=TRUE, comment=NA, tidy=FALSE, warning=FALSE)
-opts_chunk$set(size='footnotesize', out.width='0.98\\textwidth')
-opts_chunk$set(fig.width=7, fig.height=3.6, fig.align='center')
-opts_chunk$set(fig.path='usl-', fig.pos='htbp', small.mar=TRUE)
+opts_chunk$set(prompt=TRUE, comment=NA, tidy=FALSE)
+opts_chunk$set(out.width='\\textwidth', small.mar=TRUE)
+opts_chunk$set(fig.width=7, fig.height=3.6)
+opts_chunk$set(fig.align='center', fig.pos='htbp', fig.path='usl-')
 
+options(prompt='R> ', scipen=4, digits=4, width=78)
+options(digits.secs=3, show.signif.stars=TRUE)
+options(str=strOptions(strict.width='cut'))
 @
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -155,7 +160,7 @@ seen as a generalization of Amdahl's Law for speedup in parallel computing.
 
 We can solve this nonlinear equation to estimate the coefficients $\alpha$ and
 $\beta$ using a sparse set of measurements for the throughput $X_i$ at
-different loads $N_i$. Initially the Unversal Scalabilty Law normalized the
+different loads $N_i$. Initially the Universal Scalability Law normalized the
 measurements using the throughput $X(1)$ for load $1$ as the point of reference.
 This placed an additional burden on the performance analyst who needed to either
 measure the value or find a smart way to estimate it.
@@ -196,7 +201,7 @@ function calls and their arguments.
 \subsection{Case Study: Hardware Scalability}
 
 The \usl{} package contains a demo dataset with benchmark measurements from a
-raytracer software\footnote{\url{http://sourceforge.net/projects/brlcad/}}.
+ray tracer software\footnote{\url{http://sourceforge.net/projects/brlcad/}}.
 The data was gathered on an SGI~Origin~2000 with 64 R12000 processors running
 at 300~MHz.
 
@@ -237,7 +242,7 @@ number of processors. This plot is a typical example for the effects of
 benefit of adding more processors to the system gets smaller for higher
 numbers of processors.
 
-<<'rtplot2', echo=FALSE, fig.cap='Measured throughput of a raytracing software in relation to the number of available processors'>>=
+<<'rtplot2', echo=FALSE, fig.cap='Measured throughput of a ray tracing software in relation to the number of available processors'>>=
 <<rtplot1>>
 @
 
@@ -306,7 +311,7 @@ A bar plot is useful to visually compare the decreasing efficiencies for the
 configurations with an increasing number of processors. \Cref{fig:rtbarplot}
 shows the output diagram.
 
-<<'rtbarplot', fig.cap='Rate of efficiency per processor for different numbers of processors running the raytracing software'>>=
+<<'rtbarplot', fig.cap='Rate of efficiency per processor for different numbers of processors running the ray tracing software'>>=
 barplot(efficiency(usl.model), ylab = "efficiency / processor", xlab = "processors")
 @
 
@@ -343,7 +348,7 @@ calculated scalability function as a solid line. The scalability bounds are
 added as dotted lines to the output. \Cref{fig:rtplot3} has the result of that
 plot.
 
-<<'rtplot3', fig.cap='Throughput of a raytracing software using different numbers of processors'>>=
+<<'rtplot3', fig.cap='Throughput of a ray tracing software using different numbers of processors'>>=
 plot(throughput ~ processors, data = raytracer, pch = 16, ylim = c(0, 400))
 plot(usl.model, add = TRUE, bounds = TRUE)
 @
@@ -650,7 +655,7 @@ more parallelism will sometimes make performance worse.
 
 A stacked barplot can be used to visualize how the different effects change
 with an increasing degree of parallelism. Note that the result matrix must be
-transposed to match the format needed for for the \kbd{barplot()} command.
+transposed to match the format needed for the \kbd{barplot()} command.
 
 <<'ovplot1', fig.cap='Decomposition of the execution time for parallelized workloads of the SPECSDM91 benchmark. The time is measured as a fraction of the time needed for serial execution of the workload.'>>=
 barplot(height = t(ovhd), names.arg = load[, 1],
@@ -666,9 +671,9 @@ parallel jobs effectively has no effect on the total execution time.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Case Study: Multivalued Data}
+\subsection{Case Study: Multi-valued Data}
 
-It is very common to use multivalued data for a scalability analysis. These
+It is very common to use multi-valued data for a scalability analysis. These
 measurements are often taken from a live system and may include many
 different data points for similar load values. This could be the result of a
 non-homogeneous workload and an analyst has to decide how to take that into
@@ -700,7 +705,7 @@ data(oracledb)
 head(subset(oracledb, select = c(timestamp, db_time, txn_rate)))
 @
 
-A naive approch would be a plot of the data as a time series (see
+A naive approach would be a plot of the data as a time series (see
 \cref{fig:oraplot1}). This plot shows the familiar pattern of an OLTP
 application that is mostly used during office hours. Unfortunately this type
 of plot is pretty much useless when performing a scalability analysis.
@@ -734,7 +739,7 @@ Now we can retrieve the coefficients for this model.
 coef(usl.oracle)
 @
 
-Our $\alpha$ here is about an order of magnitude bigger than what we have
+Here our $\alpha$ is about an order of magnitude bigger than what we have
 seen in the previous sections. This indicates a major issue with some kind of
 serialization or queueing that severely limits the scalability. In fact it is
 so bad that the impact is already visible with only a few active sessions
